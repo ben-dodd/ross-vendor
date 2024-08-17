@@ -144,17 +144,16 @@ export default function VendorScreen() {
               />
             </div>
             {/* <div className="bg-orange-800 text-white font-bold italic px-2 py-1 mb-2" /> */}
-            {tab === 0 ||
-              (tab === 1 && (
-                <SaleSummary
-                  startDate={startDate}
-                  endDate={endDate}
-                  setStartDate={setStartDate}
-                  setEndDate={setEndDate}
-                  totalTake={totalTake}
-                  totalPaid={totalPaid}
-                />
-              ))}
+            {(tab === 0 || tab === 1) && (
+              <SaleSummary
+                startDate={startDate}
+                endDate={endDate}
+                setStartDate={setStartDate}
+                setEndDate={setEndDate}
+                totalTake={totalTake}
+                totalPaid={totalPaid}
+              />
+            )}
             <div hidden={tab !== 0}>
               <Sales sales={sales} vendorStock={vendorStock} />
             </div>

@@ -2,17 +2,15 @@ import { filterInventory } from '@/lib/data-functions'
 import { StockObject } from '@/lib/types'
 import StockItem from './item'
 import { useState } from 'react'
+import Title from '../layout/title'
+import Search from '../layout/search'
 
 const Stock = ({ vendorStock }) => {
   const [stockSearch, setStockSearch] = useState('')
   return (
     <div className="w-full">
-      <input
-        type="text"
-        className="w-full p-1 border border-gray-200 mb-8"
-        onChange={(e) => setStockSearch(e.target.value)}
-        placeholder="Search.."
-      />
+      <Title title={'RIDE ON SUPER SOUND STOCK'} />
+      <Search value={stockSearch} setValue={setStockSearch} />
       {filterInventory({
         inventory: vendorStock?.sort((a: StockObject, b: StockObject) => {
           if (a?.quantity === b?.quantity) return 0
