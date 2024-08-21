@@ -1,3 +1,4 @@
+import { writePrice } from '@/lib/data-functions'
 import dayjs from 'dayjs'
 
 const PaymentItem = ({ pay }) => {
@@ -12,11 +13,15 @@ const PaymentItem = ({ pay }) => {
         </div>
         <div className="md:hidden">{dayjs(pay?.date).format('DD/MM/YY')}</div>
       </div>
-      <div className="w-1/6 px-1 pr-4 text-right">
-        ${(pay?.amount / 100)?.toFixed(2)}
+      <div
+        className={`w-1/6 px-1 pr-4 text-right${
+          pay?.amount < 0 ? ' text-red-500' : ''
+        }`}
+      >
+        {writePrice(pay?.amount)}
       </div>
       <div className="w-1/6 px-1 uppercase">{pay?.type}</div>
-      <div className="w-4/12 md:w-5/12 px-1">{pay?.note}</div>
+      <div className="w-4/12 md:w-5/12 px-1">{pay?.reference}</div>
     </div>
   )
 }

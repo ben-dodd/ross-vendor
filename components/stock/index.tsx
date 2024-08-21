@@ -3,7 +3,7 @@ import { StockObject } from '@/lib/types'
 import StockItem from './item'
 import { useState } from 'react'
 import Title from '../layout/title'
-import Search from '../layout/search'
+import Search from '../input/search'
 
 const Stock = ({ vendorStock }) => {
   const [stockSearch, setStockSearch] = useState('')

@@ -14,7 +14,7 @@ const Search = ({ value, setValue }) => {
           <IconSearch />
         </div>
         <input
-          className="w-full px-2 text-sm outline-none bg-transparent text-xl"
+          className="w-full px-2 outline-none bg-transparent"
           value={value || ''}
           onChange={handleSearch}
           placeholder="Search..."

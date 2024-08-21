@@ -24,6 +24,7 @@ export function getImageSrc(item: StockObject) {
   else if (item?.format === 'Shirt') src = 'shirt'
   return `${process.env.NEXT_PUBLIC_RESOURCE_URL}img/${src}.png`
 }
+
 export function filterInventory({
   inventory,
   search,
@@ -83,6 +84,13 @@ export function sumPrices(
       return (acc += prices?.[field])
     }, 0)
 }
+export function writePrice(cents, omitDollarSign = false) {
+  const parsedCents = typeof cents === 'string' ? parseFloat(cents) : cents
+  if (isNaN(parsedCents) || parsedCents === null || parsedCents === undefined) {
+    return ''
+  }
+  return `${omitDollarSign ? '' : '$'}${(parsedCents / 100).toFixed(2)}`
+}
 
 export function getCartItemPrice(cartItem: any, item: StockObject) {
   // Gets three prices for each sale item: the vendor cut, store cut, and total
@@ -122,5 +130,21 @@ export function getPrice(
     (parseInt(`${quantity}`) ?? 1) *
     ((parseFloat(`${cost}`) || 0) *
       (1 - (parseFloat(`${discount}`) || 0) / 100))
+  )
+}
+
+export function filterByDates(
+  data: any[],
+  startDate: string,
+  endDate: string,
+  dateField: string = 'date'
+) {
+  return data?.filter((item) =>
+    dayjs(item?.[dateField])?.isBetween(
+      dayjs(startDate),
+      dayjs(endDate),
+      null,
+      '[]'
+    )
   )
 }

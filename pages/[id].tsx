@@ -1,25 +1,24 @@
+/* eslint-disable @next/next/no-img-element */
 import Payments from '@/components/payments'
 import Sales from '@/components/sales'
 import SaleSummary from '@/components/saleSummary'
 import ScreenSaver from '@/components/screenSaver'
 import Stock from '@/components/stock'
 import Tabs from '@/components/layout/tabs'
-import { sumPrices } from '@/lib/data-functions'
+import { filterByDates, sumPrices } from '@/lib/data-functions'
 import {
   useVendorByUid,
   useVendorPaymentsByUid,
   useVendorSalesByUid,
   useVendorStockByUid,
   useVendorStockMovementByUid,
-  useVendorStockPriceByUid,
   useVendorStoreCreditsByUid,
 } from '@/lib/swr-hooks'
 import dayjs from 'dayjs'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
-import Charts from '@/components/charts'
-import Download from '@/components/download'
+import Dashboard from '@/components/dashboard'
 
 export default function VendorScreen() {
   const router = useRouter()
@@ -29,11 +28,6 @@ export default function VendorScreen() {
     useVendorStockByUid(id)
   const { isVendorStockMovementLoading, isVendorStockMovementError } =
     useVendorStockMovementByUid(id)
-  const {
-    vendorStockPrice,
-    isVendorStockPriceLoading,
-    isVendorStockPriceError,
-  } = useVendorStockPriceByUid(id)
   const { vendorSales, isVendorSalesLoading, isVendorSalesError } =
     useVendorSalesByUid(id)
   const { vendorPayments, isVendorPaymentsLoading, isVendorPaymentsError } =
@@ -47,7 +41,6 @@ export default function VendorScreen() {
     isVendorLoading ||
     isVendorStockLoading ||
     isVendorStockMovementLoading ||
-    isVendorStockPriceLoading ||
     isVendorSalesLoading ||
     isVendorPaymentsLoading ||
     isVendorStoreCreditsLoading
@@ -55,53 +48,20 @@ export default function VendorScreen() {
     isVendorError ||
     isVendorStockError ||
     isVendorStockMovementError ||
-    isVendorStockPriceError ||
     isVendorSalesError ||
     isVendorPaymentsError ||
     isVendorStoreCreditsError
 
   const [tab, setTab] = useState(0)
-  const [startDate, setStartDate] = useState('2018-11-03')
-  const [endDate, setEndDate] = useState(dayjs().format('YYYY-MM-DD'))
-  const [sales, setSales] = useState([])
-  const [payments, setPayments] = useState([])
   const [totalTake, setTotalTake] = useState(0)
   const [totalPaid, setTotalPaid] = useState(0)
 
+  console.log(vendorPayments)
+
   useEffect(() => {
-    const totalSales = vendorSales?.map((sale) => {
-      const price = vendorStockPrice?.filter(
-        (v) =>
-          v?.stock_id === sale?.item_id &&
-          dayjs(v?.date_valid_from)?.isBefore(dayjs(sale?.date_sale_closed))
-      )?.[0]
-      return {
-        ...sale,
-        vendor_cut: price?.vendor_cut,
-        total_sell: price?.total_sell,
-      }
-    })
-    const filteredSales = totalSales?.filter((sale) =>
-      dayjs(sale?.date_sale_closed)?.isBetween(
-        dayjs(startDate),
-        dayjs(endDate),
-        null,
-        '[]'
-      )
-    )
-    const filteredPayments = vendorPayments?.filter((payment) =>
-      dayjs(payment?.date)?.isBetween(
-        dayjs(startDate),
-        dayjs(endDate),
-        null,
-        '[]'
-      )
-    )
-    setSales(filteredSales)
-    setPayments(filteredPayments)
-    setTotalTake(sumPrices(totalSales, null, 'vendorPrice'))
+    setTotalTake(sumPrices(vendorSales, null, 'vendorPrice'))
     setTotalPaid(vendorPayments?.reduce((prev, pay) => prev + pay?.amount, 0))
-  }, [vendorStockPrice, vendorSales, vendorPayments, startDate, endDate])
+  }, [vendorSales, vendorPayments])
 
   return (
     <>
@@ -121,7 +81,6 @@ export default function VendorScreen() {
           <div
             style={{
               width: '1000px',
-              // minWidth: "380px",
               marginLeft: 'auto',
               marginRight: 'auto',
             }}
@@ -130,6 +89,7 @@ export default function VendorScreen() {
               <img
                 src="https://ross.syd1.digitaloceanspaces.com/img/POS-RIDEONSUPERSOUNDLOGOBLACK.png"
                 width="500px"
+                alt="RIDE ON SUPER SOUND"
               />
             </div>
             <div className="bg-orange-800 font-4xl font-black italic text-white uppercase py-1 mb-2 px-2 flex justify-between">
@@ -138,36 +98,26 @@ export default function VendorScreen() {
             </div>
             <div className="w-full">
               <Tabs
-                tabs={['Sales', 'Payments', 'Stock', 'Charts', 'Download']}
+                tabs={['Dashboard', 'Sales', 'Payments', 'Stock']}
                 value={tab}
                 onChange={setTab}
               />
             </div>
-            {/* <div className="bg-orange-800 text-white font-bold italic px-2 py-1 mb-2" /> */}
-            {(tab === 0 || tab === 1) && (
-              <SaleSummary
-                startDate={startDate}
-                endDate={endDate}
-                setStartDate={setStartDate}
-                setEndDate={setEndDate}
-                totalTake={totalTake}
-                totalPaid={totalPaid}
-              />
-            )}
             <div hidden={tab !== 0}>
-              <Sales sales={sales} vendorStock={vendorStock} />
+              <Dashboard
+                sales={vendorSales}
+                stock={vendorStock}
+                payments={vendorPayments}
+              />
             </div>
             <div hidden={tab !== 1}>
-              <Payments payments={payments} storeCredits={vendorStoreCredits} />
+              <Sales sales={vendorSales} />
             </div>
             <div hidden={tab !== 2}>
-              <Stock vendorStock={vendorStock} />
+              <Payments payments={vendorPayments} />
             </div>
             <div hidden={tab !== 3}>
-              <Charts />
-            </div>
-            <div hidden={tab !== 4}>
-              <Download />
+              <Stock vendorStock={vendorStock} />
             </div>
           </div>
         </div>

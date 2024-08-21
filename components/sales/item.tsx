@@ -1,6 +1,7 @@
+import { writePrice } from '@/lib/data-functions'
 import dayjs from 'dayjs'
 
-const SalesItem = ({ sale, stockItem }) => {
+const SalesItem = ({ sale }) => {
   return (
     <div
       key={`${sale?.sale_id}-${sale?.item_id}`}
@@ -14,10 +15,10 @@ const SalesItem = ({ sale, stockItem }) => {
           {dayjs(sale?.date_sale_closed).format('DD/MM/YY')}
         </div>
       </div>
-      <div className="w-1/12 px-1 hidden md:inline">{stockItem?.quantity}</div>
-      <div className="w-1/12 px-1">{stockItem?.format}</div>
-      <div className="w-2/12 px-1">{stockItem?.artist}</div>
-      <div className="w-2/12 md:w-3/12 px-1">{`${stockItem?.title}${
+      <div className="w-1/12 px-1 hidden md:inline">{sale?.quantity}</div>
+      <div className="w-1/12 px-1">{sale?.format}</div>
+      <div className="w-2/12 px-1">{sale?.artist}</div>
+      <div className="w-2/12 md:w-3/12 px-1">{`${sale?.title}${
         sale?.is_refunded ? ' [REFUNDED]' : ''
       }`}</div>
       <div
@@ -25,21 +26,21 @@ const SalesItem = ({ sale, stockItem }) => {
           sale?.is_refunded ? ' line-through' : ''
         }`}
       >
-        ${(sale?.total_sell / 100)?.toFixed(2)}
+        {writePrice(sale?.total_sell)}
       </div>
       <div
         className={`w-1/12 px-1 text-right hidden md:inline${
           sale?.is_refunded ? ' line-through' : ''
         }`}
       >
-        ${((sale?.total_sell - sale?.vendor_cut) / 100)?.toFixed(2)}
+        {writePrice(sale?.store_cut)}
       </div>
       <div
         className={`w-2/12 md:w-1/12 px-1 text-right${
           sale?.is_refunded ? ' line-through' : ''
         }`}
       >
-        ${(sale?.vendor_cut / 100)?.toFixed(2)}
+        {writePrice(sale?.vendor_cut)}
       </div>
     </div>
   )
