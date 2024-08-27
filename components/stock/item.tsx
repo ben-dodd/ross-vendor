@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import { getImageSrc, getItemSku } from '@/lib/data-functions'
 
 export default function StockItem({ item }) {
@@ -42,11 +43,13 @@ export default function StockItem({ item }) {
         <div className="flex justify-between items-end">
           <div
             className={`text-md ${item?.quantity < 1 && 'text-red-500'}`}
-          >{`${item?.quantity} in stock${
+          >{`${
+            item?.quantity < 0 || !item?.quantity ? '0' : item?.quantity
+          } in stock${
             item?.quantity_hold ? `, ${-item?.quantity_hold} on hold` : ''
           }${
             item?.quantity_layby ? `, ${-item?.quantity_layby} on layby` : ''
-          }`}</div>
+          }; ${item?.quantity_sold ? -item?.quantity_sold : '0'} sold`}</div>
           <div className="text-xl pr-2">{`$${(
             (item?.total_sell || 0) / 100
           )?.toFixed(2)}`}</div>

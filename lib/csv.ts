@@ -15,18 +15,19 @@ export const generateCsv = (data, schema) => {
     ?.map(escapeCsvField)
     .join(',')
   // Convert data rows to CSV rows
-  const rows = data.map((row) =>
-    schema
-      ?.map((column) =>
-        column?.format
-          ? column?.format === '$'
-            ? writePrice(row?.[column?.field], true)
-            : dayjs(row?.[column?.field])?.format(column?.format)
-          : row?.[column?.field]
-      )
-      ?.map(escapeCsvField)
-      .join(',')
-  )
+  const rows =
+    data?.map?.((row) =>
+      schema
+        ?.map((column) =>
+          column?.format
+            ? column?.format === '$'
+              ? writePrice(row?.[column?.field], true)
+              : dayjs(row?.[column?.field])?.format(column?.format)
+            : row?.[column?.field]
+        )
+        ?.map(escapeCsvField)
+        .join(',')
+    ) || []
   return [headerRow, ...rows].join('\n')
 }
 

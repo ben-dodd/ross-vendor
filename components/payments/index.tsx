@@ -50,12 +50,12 @@ export default function Payments({ payments }) {
   }, [payments, startDate, endDate, search, sortOption])
 
   const sortOptions = [
-    { value: 'date', label: 'Newest to Oldest' },
-    { value: 'dateRev', label: 'Oldest to Newest' },
-    { value: 'type', label: 'Sort by Payment Type' },
-    { value: 'amount', label: 'Sort by Amount (Low to High)' },
-    { value: 'amountRev', label: 'Sort by Amount (High to Low)' },
-    { value: 'reference', label: 'Sort by Reference' },
+    { value: 'date', label: 'Date (Newest to Oldest)' },
+    { value: 'dateRev', label: 'Date (Oldest to Newest)' },
+    { value: 'type', label: 'Payment Type' },
+    { value: 'amount', label: 'Amount (Low to High)' },
+    { value: 'amountRev', label: 'Amount (High to Low)' },
+    { value: 'reference', label: 'Reference' },
   ]
 
   const csvSchema = [
@@ -75,8 +75,8 @@ export default function Payments({ payments }) {
         title={'RIDE ON SUPER SOUND PAYMENTS'}
         downloadData={downloadData}
       />
-      <div className="flex justify-between items-center space-x-8 py-2">
-        <Search value={search} setValue={setSearch} />
+      <div className="flex justify-between items-end space-x-8 py-2">
+        <Search value={search} setValue={setSearch} label="SEARCH PAYMENTS" />
         <DatePicker
           startDate={startDate}
           endDate={endDate}
@@ -84,6 +84,7 @@ export default function Payments({ payments }) {
           setEndDate={setEndDate}
         />
         <Select
+          label="SORT BY"
           options={sortOptions}
           value={null}
           onChange={(val) => setSortOption(val)}

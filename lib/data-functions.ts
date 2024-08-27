@@ -1,4 +1,10 @@
-import { StockObject } from '@/lib/types'
+import {
+  PaymentData,
+  PaymentMonthlySummary,
+  SaleData,
+  SaleMonthlySummary,
+  StockObject,
+} from '@/lib/types'
 
 import dayjs from 'dayjs'
 
@@ -147,4 +153,98 @@ export function filterByDates(
       '[]'
     )
   )
+}
+
+export function summarisePaymentsData(
+  payments: PaymentData[]
+): PaymentMonthlySummary[] {
+  // Create a map to hold the monthly summary data
+  const summary: Record<
+    string,
+    { totalPayments: number; totalAmount: number }
+  > = {}
+
+  payments.forEach((payment) => {
+    const month = dayjs(payment.date).format('YYYY-MM') // Extract year-month from date
+
+    if (!summary[month]) {
+      summary[month] = {
+        totalPayments: 0,
+        totalAmount: 0,
+      }
+    }
+
+    summary[month].totalPayments += 1
+    summary[month].totalAmount += payment.amount / 100
+  })
+
+  // Convert the summary object to an array and sort it by month
+  const sortedSummary = Object.entries(summary)
+    .map(([month, data]) => ({ month, ...data }))
+    .sort((a, b) => (dayjs(a.month).isBefore(dayjs(b.month)) ? -1 : 1))
+
+  return sortedSummary
+}
+
+export function summariseSalesData(
+  salesData: SaleData[]
+): SaleMonthlySummary[] {
+  const summary: Record<string, SaleMonthlySummary> = {}
+
+  salesData.forEach((sale) => {
+    const month = dayjs(sale.date_sale_closed).format('YYYY-MM')
+
+    if (!summary[month]) {
+      summary[month] = {
+        month,
+        totalQuantities: 0,
+        formatDetails: {},
+        totalStoreCut: 0,
+        totalTotalSell: 0,
+        totalVendorCut: 0,
+      }
+    }
+
+    const monthSummary = summary[month]
+
+    // Increment totals
+    monthSummary.totalQuantities += sale.quantity
+    monthSummary.totalStoreCut += sale.store_cut / 100
+    monthSummary.totalTotalSell += sale.total_sell / 100
+    monthSummary.totalVendorCut += sale.vendor_cut / 100
+
+    // Initialize format details if not already present
+    if (!monthSummary.formatDetails[sale.format]) {
+      monthSummary.formatDetails[sale.format] = {
+        totalQuantity: 0,
+        totalSell: 0,
+        totalStoreCut: 0,
+        totalVendorCut: 0,
+      }
+    }
+
+    // Update format details
+    const formatSummary = monthSummary.formatDetails[sale.format]
+    formatSummary.totalQuantity += sale.quantity
+    formatSummary.totalSell += sale.total_sell / 100
+    formatSummary.totalStoreCut += sale.store_cut / 100
+    formatSummary.totalVendorCut += sale.vendor_cut / 100
+  })
+
+  // Convert the summary object to an array and sort it by month
+  const sortedSummary: SaleMonthlySummary[] = Object.values(summary).sort(
+    (a, b) => (dayjs(a.month).isBefore(dayjs(b.month)) ? -1 : 1)
+  )
+
+  return sortedSummary
+}
+
+// Helper function to generate random colors for each format
+export function getRandomColor() {
+  const letters = '0123456789ABCDEF'
+  let color = '#'
+  for (let i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)]
+  }
+  return color
 }

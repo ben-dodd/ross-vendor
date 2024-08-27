@@ -1,20 +1,17 @@
 /* eslint-disable @next/next/no-img-element */
 import Payments from '@/components/payments'
 import Sales from '@/components/sales'
-import SaleSummary from '@/components/saleSummary'
 import ScreenSaver from '@/components/screenSaver'
 import Stock from '@/components/stock'
 import Tabs from '@/components/layout/tabs'
-import { filterByDates, sumPrices } from '@/lib/data-functions'
+import { sumPrices } from '@/lib/data-functions'
 import {
   useVendorByUid,
   useVendorPaymentsByUid,
   useVendorSalesByUid,
   useVendorStockByUid,
   useVendorStockMovementByUid,
-  useVendorStoreCreditsByUid,
 } from '@/lib/swr-hooks'
-import dayjs from 'dayjs'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
@@ -32,25 +29,18 @@ export default function VendorScreen() {
     useVendorSalesByUid(id)
   const { vendorPayments, isVendorPaymentsLoading, isVendorPaymentsError } =
     useVendorPaymentsByUid(id)
-  const {
-    vendorStoreCredits,
-    isVendorStoreCreditsError,
-    isVendorStoreCreditsLoading,
-  } = useVendorStoreCreditsByUid(id)
   const loading =
     isVendorLoading ||
     isVendorStockLoading ||
     isVendorStockMovementLoading ||
     isVendorSalesLoading ||
-    isVendorPaymentsLoading ||
-    isVendorStoreCreditsLoading
+    isVendorPaymentsLoading
   const error =
     isVendorError ||
     isVendorStockError ||
     isVendorStockMovementError ||
     isVendorSalesError ||
-    isVendorPaymentsError ||
-    isVendorStoreCreditsError
+    isVendorPaymentsError
 
   const [tab, setTab] = useState(0)
   const [totalTake, setTotalTake] = useState(0)
@@ -117,7 +107,7 @@ export default function VendorScreen() {
               <Payments payments={vendorPayments} />
             </div>
             <div hidden={tab !== 3}>
-              <Stock vendorStock={vendorStock} />
+              <Stock stock={vendorStock} />
             </div>
           </div>
         </div>

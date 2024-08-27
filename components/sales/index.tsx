@@ -8,6 +8,7 @@ import Search from '../input/search'
 import Select from '../input/select'
 import SalesTableHeader from './tableHeader'
 import { downloadCsv, generateCsv } from '@/lib/csv'
+import Selector from '../input/select'
 
 export default function Sales({ sales }) {
   const [search, setSearch] = useState('')
@@ -60,15 +61,15 @@ export default function Sales({ sales }) {
   }, [sales, startDate, endDate, search, sortOption])
 
   const sortOptions = [
-    { value: 'date', label: 'Newest to Oldest' },
-    { value: 'dateRev', label: 'Oldest to Newest' },
-    { value: 'format', label: 'Sort by Format' },
-    { value: 'artist', label: 'Sort by Artist' },
-    { value: 'title', label: 'Sort by Title' },
-    { value: 'price', label: 'Sort by Price (Low to High)' },
-    { value: 'priceRev', label: 'Sort by Price (High to Low)' },
-    { value: 'vendorCut', label: 'Sort by Vendor Cut (Low to High)' },
-    { value: 'vendorCutRev', label: 'Sort by Vendor Cut (High to Low)' },
+    { value: 'date', label: 'Date (Newest to Oldest)' },
+    { value: 'dateRev', label: 'Date (Oldest to Newest)' },
+    { value: 'format', label: 'Format' },
+    { value: 'artist', label: 'Artist' },
+    { value: 'title', label: 'Title' },
+    { value: 'price', label: 'Price (Low to High)' },
+    { value: 'priceRev', label: 'Price (High to Low)' },
+    { value: 'vendorCut', label: 'Vendor Cut (Low to High)' },
+    { value: 'vendorCutRev', label: 'Vendor Cut (High to Low)' },
   ]
 
   const csvSchema = [
@@ -84,12 +85,12 @@ export default function Sales({ sales }) {
 
   const downloadData = () =>
     downloadCsv(csvContent, `ross-sales-${dayjs()?.format('YYYY-MM-DD')}`)
-
+  console.log(sales)
   return (
     <div className="w-full">
       <Title title={'RIDE ON SUPER SOUND SALES'} downloadData={downloadData} />
-      <div className="flex justify-between items-center space-x-8 py-2">
-        <Search value={search} setValue={setSearch} />
+      <div className="flex justify-between items-start space-x-8 py-2">
+        <Search value={search} setValue={setSearch} label="SEARCH SALES" />
         <DatePicker
           startDate={startDate}
           endDate={endDate}
@@ -97,6 +98,7 @@ export default function Sales({ sales }) {
           setEndDate={setEndDate}
         />
         <Select
+          label="SORT BY"
           options={sortOptions}
           value={null}
           onChange={(val) => setSortOption(val)}

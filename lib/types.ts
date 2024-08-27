@@ -83,3 +83,58 @@ export interface StockObject {
   discogsItem?: any
   needs_restock?: boolean
 }
+
+// Define the Payment interface
+export interface PaymentData {
+  amount: number
+  date: string
+  bank_reference?: string | null
+  note?: string | null
+  payment_id?: number
+  reference?: string
+  type?: string
+}
+
+// Define the Summary interface
+export interface PaymentMonthlySummary {
+  month: string
+  totalPayments: number
+  totalAmount: number
+}
+
+// Define the SaleData interface
+export interface SaleData {
+  artist: string
+  date_sale_closed: string
+  format: string
+  is_refunded: number
+  item_id: number
+  quantity: number
+  sale_id: number
+  stock_quantity: number
+  store_cut: number
+  store_discount?: number | null
+  title: string
+  total_sell: number
+  vendor_cut: number
+  vendor_discount?: number | null
+  vendor_id: number
+}
+
+// Define the FormatSummary interface
+interface FormatSummary {
+  totalQuantity: number
+  totalSell: number
+  totalStoreCut: number
+  totalVendorCut: number
+}
+
+// Define the MonthlySummary interface
+export interface SaleMonthlySummary {
+  month: string
+  totalQuantities: number
+  formatDetails: Record<string, FormatSummary>
+  totalStoreCut: number
+  totalTotalSell: number
+  totalVendorCut: number
+}
