@@ -10,6 +10,7 @@ const handler: NextApiHandler = async (req, res) => {
       SELECT
         s.id,
         s.vendor_id,
+        CONCAT(LPAD(s.vendor_id, 3, '0'), '/', LPAD(s.id, 5, '0')) AS sku, -- Add SKU
         s.artist,
         s.title,
         s.display_as,
@@ -20,21 +21,15 @@ const handler: NextApiHandler = async (req, res) => {
         s.is_new,
         s.cond,
         s.image_url,
-        s.is_gift_card,
-        s.gift_card_code,
-        s.gift_card_amount,
-        s.gift_card_remaining,
-        s.gift_card_is_valid,
-        s.is_misc_item,
-        s.misc_item_description,
-        s.misc_item_amount,
-        s.needs_restock,
+        s.date_created,
         p.vendor_cut,
         p.total_sell,
+        p.total_sell - p.vendor_cut AS store_cut, -- Calculate store_cut
+        (p.vendor_cut / p.total_sell) * 100 AS margin, -- Calculate margin
         q.quantity,
-        hol.quantity_hold,
-        lay.quantity_layby,
-        sol.quantity_sold
+        hol.quantity_hold * -1 AS quantity_hold, -- Adjust quantity_hold
+        lay.quantity_layby * -1 AS quantity_layby, -- Adjust quantity_layby
+        sol.quantity_sold * -1 AS quantity_sold -- Adjust quantity_sold
       FROM stock AS s
       LEFT JOIN
         (SELECT stock_id, SUM(quantity) AS quantity FROM stock_movement WHERE NOT is_deleted GROUP BY stock_id) AS q
@@ -50,11 +45,11 @@ const handler: NextApiHandler = async (req, res) => {
         ON sol.stock_id = s.id
       LEFT JOIN stock_price AS p ON p.stock_id = s.id
       WHERE
-         (p.id = (
+         p.id = (
             SELECT MAX(id)
             FROM stock_price
             WHERE stock_id = s.id
-         ) OR s.is_gift_card OR s.is_misc_item)
+         )
       AND s.is_deleted = 0
       AND vendor_id = (
         SELECT id FROM vendor WHERE uid = ?

@@ -18,6 +18,7 @@ const handler: NextApiHandler = async (req, res) => {
         stock_price.vendor_cut,
         stock_price.total_sell,
         (stock_price.total_sell - stock_price.vendor_cut) AS store_cut, -- Added field
+        stock_price.vendor_cut / stock_price.total_sell * 100 AS margin, -- Margin field
         stock.artist,
         stock.title,
         stock.format,

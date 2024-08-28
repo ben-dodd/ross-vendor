@@ -6,6 +6,7 @@ import {
 import SaleSummary from '../saleSummary'
 import SalesChart from '../charts/salesChart'
 import PaymentsChart from '../charts/paymentsChart'
+import SalesCumChart from '../charts/salesCumChart'
 
 const Dashboard = ({ sales, payments, stock }) => {
   const totalTake = sumPrices(sales, null, 'vendorPrice')
@@ -18,6 +19,7 @@ const Dashboard = ({ sales, payments, stock }) => {
       <SaleSummary totalTake={totalTake} totalPaid={totalPaid} />
       <SalesChart salesSummary={salesSummary} />
       <PaymentsChart paymentSummary={paymentSummary} />
+      <SalesCumChart salesSummary={salesSummary} />
     </div>
   )
 }

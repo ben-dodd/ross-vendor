@@ -1,60 +1,30 @@
-/* eslint-disable @next/next/no-img-element */
-import { getImageSrc, getItemSku } from '@/lib/data-functions'
+import { writePrice } from '@/lib/data-functions'
 
-export default function StockItem({ item }) {
+const StockItem = ({ item }) => {
   return (
     <div
-      className={`flex w-full mb-2 pr-2 text-black ${
-        item?.quantity < 1 ? 'bg-pink-100' : 'bg-gray-200'
-      }`}
+      key={`${item?.vendor_id}-${item?.id}`}
+      className="flex py-2 text-xs border-b hover:bg-gradient-to-r from-white via-orange-200 to-white"
     >
-      <div className="w-32">
-        <img
-          className={`object-cover h-32 ${
-            item?.quantity < 1 ? ' opacity-50' : ''
-          }`}
-          src={getImageSrc(item)}
-          alt={item?.title || 'Inventory image'}
-        />
-        <div className="text-lg font-bold text-center bg-black text-white w-32">
-          {getItemSku(item)}
-        </div>
+      <div className="w-2/12 px-1">{item?.sku}</div>
+      <div className="w-2/12 px-1">{item?.artist}</div>
+      <div className="w-2/12 px-1">{item?.title}</div>
+      <div className="w-1/12 px-1">{item?.format}</div>
+      <div className="w-1/12 px-1">{item?.is_new ? 'Yes' : 'No'}</div>
+      <div className="w-1/12 px-1">{item?.cond}</div>
+      <div className="w-1/12 px-1 text-right">
+        {writePrice(item?.vendor_cut)}
       </div>
-      <div className="flex flex-col justify-between pl-2 w-full">
-        <div>
-          <div className="flex justify-between border-b items-center border-gray-400">
-            <div>
-              <div className="font-bold text-md">{`${
-                item?.title || 'Untitled'
-              }`}</div>
-              <div className="text-md">{`${item?.artist || 'Untitled'}`}</div>
-            </div>
-            <div className="text-red-400 font-bold text-xl text-right">
-              {item?.quantity < 1 ? 'OUT OF STOCK!' : ''}
-            </div>
-          </div>
-          <div className="text-sm text-green-800">{`${
-            item?.genre ? `${item.genre} / ` : ''
-          }${item?.format || ''} [${
-            item?.is_new ? 'NEW' : item?.cond?.toUpperCase() || 'USED'
-          }]`}</div>
-        </div>
-
-        <div className="flex justify-between items-end">
-          <div
-            className={`text-md ${item?.quantity < 1 && 'text-red-500'}`}
-          >{`${
-            item?.quantity < 0 || !item?.quantity ? '0' : item?.quantity
-          } in stock${
-            item?.quantity_hold ? `, ${-item?.quantity_hold} on hold` : ''
-          }${
-            item?.quantity_layby ? `, ${-item?.quantity_layby} on layby` : ''
-          }; ${item?.quantity_sold ? -item?.quantity_sold : '0'} sold`}</div>
-          <div className="text-xl pr-2">{`$${(
-            (item?.total_sell || 0) / 100
-          )?.toFixed(2)}`}</div>
-        </div>
+      <div className="w-1/12 px-1 text-right">
+        {writePrice(item?.total_sell)}
       </div>
+      <div className="w-1/12 px-1 text-right">
+        {item?.margin?.toFixed?.(1)}%
+      </div>
+      <div className="w-1/12 px-1 text-right">{item?.quantity}</div>
+      <div className="w-1/12 px-1 text-right">{item?.quantity_sold}</div>
     </div>
   )
 }
+
+export default StockItem

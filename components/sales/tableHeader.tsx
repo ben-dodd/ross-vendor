@@ -8,7 +8,8 @@ const SalesTableHeader = () => {
       <div className="w-2/12 px-1 md:w-3/12">TITLE</div>
       <div className="w-2/12 px-1 text-right md:w-1/12">RETAIL PRICE</div>
       <div className="w-1/12 px-1 text-right hidden md:inline">ROSS TAKE</div>
-      <div className="w-2/12 px-1 md:w-1/12 text-right">VENDOR TAKE</div>
+      <div className="w-1/12 px-1 md:w-1/12 text-right">VENDOR TAKE</div>
+      <div className="w-1/12 px-1 md:w-1/12 text-right">MARGIN</div>
     </div>
   )
 }

@@ -9,7 +9,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js'
-import zoomPlugin from 'chartjs-plugin-zoom'
+// import zoomPlugin from 'chartjs-plugin-zoom'
 import { useEffect, useRef } from 'react'
 
 // Register necessary Chart.js components
@@ -20,8 +20,8 @@ Chart.register(
   LinearScale,
   Title,
   Tooltip,
-  Legend,
-  zoomPlugin
+  Legend
+  // zoomPlugin
 )
 
 type PaymentsChartProps = {

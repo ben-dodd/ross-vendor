@@ -9,7 +9,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js'
-import zoomPlugin from 'chartjs-plugin-zoom'
+// import zoomPlugin from 'chartjs-plugin-zoom'
 import { useEffect, useRef } from 'react'
 
 // Register necessary Chart.js components and zoom plugin
@@ -20,8 +20,8 @@ Chart.register(
   LinearScale,
   Title,
   Tooltip,
-  Legend,
-  zoomPlugin
+  Legend
+  // zoomPlugin
 )
 
 type SalesChartProps = {
@@ -104,23 +104,23 @@ const SalesChart = ({ salesSummary }: SalesChartProps) => {
                 },
               },
             },
-            zoom: {
-              zoom: {
-                wheel: {
-                  enabled: true, // Enable zooming with mouse wheel
-                },
-                pinch: {
-                  enabled: true, // Enable zooming with pinch gestures
-                },
-                // mode: 'xy', // Zoom in both x and y axes
-                mode: 'x',
-              },
-              pan: {
-                enabled: true, // Enable panning
-                // mode: 'xy', // Pan in both x and y axes
-                mode: 'x',
-              },
-            },
+            // zoom: {
+            //   zoom: {
+            //     wheel: {
+            //       enabled: true, // Enable zooming with mouse wheel
+            //     },
+            //     pinch: {
+            //       enabled: true, // Enable zooming with pinch gestures
+            //     },
+            //     // mode: 'xy', // Zoom in both x and y axes
+            //     mode: 'x',
+            //   },
+            //   pan: {
+            //     enabled: true, // Enable panning
+            //     // mode: 'xy', // Pan in both x and y axes
+            //     mode: 'x',
+            //   },
+            // },
           },
           scales: {
             x: {

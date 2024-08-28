@@ -36,11 +36,14 @@ const SalesItem = ({ sale }) => {
         {writePrice(sale?.store_cut)}
       </div>
       <div
-        className={`w-2/12 md:w-1/12 px-1 text-right${
+        className={`w-1/12 md:w-1/12 px-1 text-right${
           sale?.is_refunded ? ' line-through' : ''
         }`}
       >
         {writePrice(sale?.vendor_cut)}
+      </div>
+      <div className={`w-1/12 md:w-1/12 px-1 text-right`}>
+        {sale?.margin?.toFixed?.(1)}%
       </div>
     </div>
   )

@@ -53,6 +53,10 @@ export default function Sales({ sales }) {
             return a.vendor_cut - b.vendor_cut // Sort by vendorCut (assuming vendor_cut is the vendorCut)
           case 'vendorCutRev':
             return b.vendor_cut - a.vendor_cut // Sort by Price (assuming vendor_cut is the price)
+          case 'margin':
+            return a.margin - b.margin // Sort by margin
+          case 'marginRev':
+            return b.margin - a.margin // Sort by margin
           default:
             return 0 // No sorting if the key doesn't match any case
         }
@@ -70,6 +74,8 @@ export default function Sales({ sales }) {
     { value: 'priceRev', label: 'Price (High to Low)' },
     { value: 'vendorCut', label: 'Vendor Cut (Low to High)' },
     { value: 'vendorCutRev', label: 'Vendor Cut (High to Low)' },
+    { value: 'margin', label: 'Margin (Low to High)' },
+    { value: 'marginRev', label: 'Margin (High to Low)' },
   ]
 
   const csvSchema = [
@@ -80,6 +86,7 @@ export default function Sales({ sales }) {
     { header: 'Retail Price (NZD)', field: 'price', format: '$' },
     { header: 'ROSS Take (NZD)', field: 'store_cut', format: '$' },
     { header: 'Vendor Take (NZD)', field: 'vendor_cut', format: '$' },
+    { header: 'Margin', field: 'margin', format: '%' },
   ]
   const csvContent = generateCsv(sales, csvSchema)
 

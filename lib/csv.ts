@@ -22,6 +22,8 @@ export const generateCsv = (data, schema) => {
           column?.format
             ? column?.format === '$'
               ? writePrice(row?.[column?.field], true)
+              : column?.format === '%'
+              ? row?.[column?.field]?.toFixed(1)
               : dayjs(row?.[column?.field])?.format(column?.format)
             : row?.[column?.field]
         )
