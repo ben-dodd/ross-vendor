@@ -155,67 +155,92 @@ export function filterByDates(
   )
 }
 
-export function summarisePaymentsData(
-  payments: PaymentData[]
-): PaymentMonthlySummary[] {
-  // Create a map to hold the monthly summary data
-  const summary: Record<
-    string,
-    { totalPayments: number; totalAmount: number }
-  > = {}
+// Payment summary function with month processing
+export const summarisePaymentData = (
+  paymentData: PaymentData[]
+): PaymentMonthlySummary[] => {
+  // Get min and max dates from the payment data
+  const minDate = dayjs.min(paymentData.map((payment) => dayjs(payment.date)))
+  const maxDate = dayjs() // Use today's date
 
-  payments.forEach((payment) => {
-    const month = dayjs(payment.date).format('YYYY-MM') // Extract year-month from date
+  // Get all months from the earliest payment date to today
+  const allMonths = getAllMonths(minDate, maxDate)
 
-    if (!summary[month]) {
-      summary[month] = {
-        totalPayments: 0,
-        totalAmount: 0,
-      }
+  // Initialize summary object with all months
+  const summary: Record<string, PaymentMonthlySummary> = {}
+  allMonths.forEach((month) => {
+    summary[month] = {
+      month: month,
+      totalPayments: 0,
+      totalAmount: 0,
     }
-
-    summary[month].totalPayments += 1
-    summary[month].totalAmount += payment.amount / 100
   })
 
-  // Convert the summary object to an array and sort it by month
-  const sortedSummary = Object.entries(summary)
-    .map(([month, data]) => ({ month, ...data }))
-    .sort((a, b) => (dayjs(a.month).isBefore(dayjs(b.month)) ? -1 : 1))
+  // Process each payment
+  paymentData.forEach((payment) => {
+    const month = dayjs(payment.date).format('YYYY-MM')
+    summary[month].totalPayments += 1
+    summary[month].totalAmount += payment.amount
+  })
 
-  return sortedSummary
+  return Object.values(summary)
 }
 
-export function summariseSalesData(
-  salesData: SaleData[]
-): SaleMonthlySummary[] {
-  const summary: Record<string, SaleMonthlySummary> = {}
+// Helper function to get all months between two dates
+const getAllMonths = (
+  startDate: dayjs.Dayjs,
+  endDate: dayjs.Dayjs
+): string[] => {
+  const start = dayjs(startDate).startOf('month')
+  const end = dayjs(endDate).endOf('month')
+  const months: string[] = []
 
+  let current = start
+  while (current.isBefore(end) || current.isSame(end, 'month')) {
+    months.push(current.format('YYYY-MM'))
+    current = current.add(1, 'month')
+  }
+
+  return months
+}
+// Sales summary function with month processing and format categorisation
+export const summariseSalesData = (
+  salesData: SaleData[]
+): SaleMonthlySummary[] => {
+  // Get min and max dates from the sales data
+  const minDate = dayjs.min(
+    salesData.map((sale) => dayjs(sale.date_sale_closed))
+  )
+  const maxDate = dayjs() // Use today's date
+
+  // Get all months from the earliest sale date to today
+  const allMonths = getAllMonths(minDate, maxDate)
+
+  // Initialize summary object with all months
+  const summary: Record<string, SaleMonthlySummary> = {}
+  allMonths.forEach((month) => {
+    summary[month] = {
+      month: month,
+      totalQuantities: 0,
+      formatDetails: {},
+      totalStoreCut: 0,
+      totalTotalSell: 0,
+      totalVendorCut: 0,
+    }
+  })
+
+  // Process each sale
   salesData.forEach((sale) => {
     const month = dayjs(sale.date_sale_closed).format('YYYY-MM')
+    const format = sale.format
+    const vendorCut = sale.vendor_cut / 100 // Convert to dollars
+    const storeCut = sale.store_cut / 100 // Convert to dollars
+    const totalSell = sale.total_sell / 100 // Convert to dollars
+    const quantity = sale.quantity
 
-    if (!summary[month]) {
-      summary[month] = {
-        month,
-        totalQuantities: 0,
-        formatDetails: {},
-        totalStoreCut: 0,
-        totalTotalSell: 0,
-        totalVendorCut: 0,
-      }
-    }
-
-    const monthSummary = summary[month]
-
-    // Increment totals
-    monthSummary.totalQuantities += sale.quantity
-    monthSummary.totalStoreCut += sale.store_cut / 100
-    monthSummary.totalTotalSell += sale.total_sell / 100
-    monthSummary.totalVendorCut += sale.vendor_cut / 100
-
-    // Initialize format details if not already present
-    if (!monthSummary.formatDetails[sale.format]) {
-      monthSummary.formatDetails[sale.format] = {
+    // Update month summary
+    if (!summary[month].formatDetails[format]) {
+      summary[month].formatDetails[format] = {
         totalQuantity: 0,
         totalSell: 0,
         totalStoreCut: 0,
@@ -223,28 +248,62 @@ export function summariseSalesData(
       }
     }
 
-    // Update format details
-    const formatSummary = monthSummary.formatDetails[sale.format]
-    formatSummary.totalQuantity += sale.quantity
-    formatSummary.totalSell += sale.total_sell / 100
-    formatSummary.totalStoreCut += sale.store_cut / 100
-    formatSummary.totalVendorCut += sale.vendor_cut / 100
+    summary[month].formatDetails[format].totalQuantity += quantity
+    summary[month].formatDetails[format].totalSell += totalSell
+    summary[month].formatDetails[format].totalStoreCut += storeCut
+    summary[month].formatDetails[format].totalVendorCut += vendorCut
+
+    summary[month].totalQuantities += quantity
+    summary[month].totalStoreCut += storeCut
+    summary[month].totalTotalSell += totalSell
+    summary[month].totalVendorCut += vendorCut
   })
 
-  // Convert the summary object to an array and sort it by month
-  const sortedSummary: SaleMonthlySummary[] = Object.values(summary).sort(
-    (a, b) => (dayjs(a.month).isBefore(dayjs(b.month)) ? -1 : 1)
-  )
+  // Collect all formats and their totals
+  const formatTotals: Record<string, { totalQuantity: number }> = {}
 
-  return sortedSummary
-}
+  Object.values(summary).forEach((monthData) => {
+    Object.entries(monthData.formatDetails).forEach(([format, data]) => {
+      if (!formatTotals[format]) {
+        formatTotals[format] = { totalQuantity: 0 }
+      }
+      formatTotals[format].totalQuantity += data.totalQuantity
+    })
+  })
 
-// Helper function to generate random colors for each format
-export function getRandomColor() {
-  const letters = '0123456789ABCDEF'
-  let color = '#'
-  for (let i = 0; i < 6; i++) {
-    color += letters[Math.floor(Math.random() * 16)]
-  }
-  return color
+  // Determine top 5 formats overall
+  const topFormats = Object.entries(formatTotals)
+    .sort((a, b) => b[1].totalQuantity - a[1].totalQuantity)
+    .slice(0, 5)
+    .map(([format]) => format)
+
+  // Update summaries to include only top 5 formats and an "Other" category
+  Object.values(summary).forEach((monthData) => {
+    const updatedFormatDetails: Record<string, any> = {}
+    const otherSummary = {
+      totalQuantity: 0,
+      totalSell: 0,
+      totalStoreCut: 0,
+      totalVendorCut: 0,
+    }
+
+    Object.entries(monthData.formatDetails).forEach(([format, data]) => {
+      if (topFormats.includes(format)) {
+        updatedFormatDetails[format] = data
+      } else {
+        otherSummary.totalQuantity += data.totalQuantity
+        otherSummary.totalSell += data.totalSell
+        otherSummary.totalStoreCut += data.totalStoreCut
+        otherSummary.totalVendorCut += data.totalVendorCut
+      }
+    })
+
+    if (otherSummary.totalQuantity > 0) {
+      updatedFormatDetails['Other'] = otherSummary
+    }
+
+    monthData.formatDetails = updatedFormatDetails
+  })
+
+  return Object.values(summary)
 }
