@@ -9,6 +9,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js'
+import zoomPlugin from 'chartjs-plugin-zoom'
 import { useEffect, useRef } from 'react'
 
 // Register necessary Chart.js components
@@ -19,7 +20,8 @@ Chart.register(
   LinearScale,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  zoomPlugin
 )
 
 type PaymentsChartProps = {
@@ -69,6 +71,21 @@ const PaymentsChart = ({ paymentSummary }: PaymentsChartProps) => {
                   const value = tooltipItem.raw as number
                   return `${label}: $${value.toFixed(2)}`
                 },
+              },
+            },
+            zoom: {
+              zoom: {
+                wheel: {
+                  enabled: true, // Enable zooming with mouse wheel
+                },
+                pinch: {
+                  enabled: true, // Enable zooming with pinch gestures
+                },
+                mode: 'x', // Zoom in both x and y axes
+              },
+              pan: {
+                enabled: true, // Enable panning
+                mode: 'x', // Pan in both x and y axes
               },
             },
           },

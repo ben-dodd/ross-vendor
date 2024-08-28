@@ -15,6 +15,7 @@
     "@tremor/react": "^3.17.4",
     "@visx/visx": "^3.11.0",
     "chart.js": "^4.4.4",
+    "chartjs-plugin-zoom": "^2.0.1",
     "dayjs": "^1.11.3",
     "mysql": "^2.18.1",
     "next": "^12.0.7",

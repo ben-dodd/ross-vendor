@@ -138,3 +138,42 @@ export interface SaleMonthlySummary {
   totalTotalSell: number
   totalVendorCut: number
 }
+export interface StockData {
+  artist: string
+  cond: string
+  country: string
+  display_as: string | null
+  format: string
+  gift_card_amount: number | null
+  gift_card_code: string | null
+  gift_card_is_valid: number
+  gift_card_remaining: number | null
+  id: number
+  image_url: string
+  is_gift_card: number
+  is_misc_item: number
+  is_new: number
+  media: string
+  misc_item_amount: number | null
+  misc_item_description: string
+  needs_restock: number
+  quantity: number
+  quantity_hold: number | null
+  quantity_layby: number | null
+  quantity_sold: number
+  section: string
+  title: string
+  total_sell: number
+  vendor_cut: number
+  vendor_id: number
+}
+
+export interface TopSeller {
+  itemId: number
+  quantity: number
+}
+
+export interface OutOfStockItem {
+  itemId: number
+  quantity: number
+}

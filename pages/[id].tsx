@@ -46,8 +46,6 @@ export default function VendorScreen() {
   const [totalTake, setTotalTake] = useState(0)
   const [totalPaid, setTotalPaid] = useState(0)
 
-  console.log(vendorPayments)
-
   useEffect(() => {
     setTotalTake(sumPrices(vendorSales, null, 'vendorPrice'))
     setTotalPaid(vendorPayments?.reduce((prev, pay) => prev + pay?.amount, 0))

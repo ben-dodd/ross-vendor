@@ -85,7 +85,6 @@ export default function Sales({ sales }) {
 
   const downloadData = () =>
     downloadCsv(csvContent, `ross-sales-${dayjs()?.format('YYYY-MM-DD')}`)
-  console.log(sales)
   return (
     <div className="w-full">
       <Title title={'RIDE ON SUPER SOUND SALES'} downloadData={downloadData} />

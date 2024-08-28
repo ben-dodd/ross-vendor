@@ -1,9 +1,12 @@
 import {
+  OutOfStockItem,
   PaymentData,
   PaymentMonthlySummary,
   SaleData,
   SaleMonthlySummary,
+  StockData,
   StockObject,
+  TopSeller,
 } from '@/lib/types'
 
 import dayjs from 'dayjs'
@@ -306,4 +309,70 @@ export const summariseSalesData = (
   })
 
   return Object.values(summary)
+}
+
+export const getLatestSells = (
+  salesData: SaleData[],
+  limit: number
+): SaleData[] => {
+  return salesData
+    .sort(
+      (a, b) =>
+        dayjs(b.date_sale_closed).unix() - dayjs(a.date_sale_closed).unix()
+    )
+    .slice(0, limit)
+}
+
+export const getTopSellers = (
+  salesData: SaleData[],
+  limit: number
+): TopSeller[] => {
+  const itemQuantities: Record<number, number> = {}
+
+  salesData.forEach((sale) => {
+    if (!itemQuantities[sale.item_id]) {
+      itemQuantities[sale.item_id] = 0
+    }
+    itemQuantities[sale.item_id] += sale.quantity
+  })
+
+  return Object.entries(itemQuantities)
+    .map(([itemId, quantity]) => ({
+      itemId: parseInt(itemId, 10),
+      quantity,
+    }))
+    .sort((a, b) => b.quantity - a.quantity)
+    .slice(0, limit)
+}
+
+export const getOutOfStockItems = (
+  salesData: SaleData[],
+  stockData: StockData[]
+): Record<number, OutOfStockItem> => {
+  const stockMap = new Map<number, number>()
+
+  // Map stock quantities by item ID
+  stockData.forEach((stock) => {
+    stockMap.set(stock.id, stock.quantity)
+  })
+
+  // Check stock status for each item in sales data
+  const outOfStockItems: Record<number, OutOfStockItem> = {}
+
+  salesData.forEach((sale) => {
+    if (stockMap.has(sale.item_id)) {
+      const remainingStock = stockMap.get(sale.item_id)! - sale.quantity
+      if (remainingStock <= 0) {
+        outOfStockItems[sale.item_id] = {
+          itemId: sale.item_id,
+          quantity: Math.abs(remainingStock),
+        }
+        stockMap.set(sale.item_id, 0) // Set stock to 0 to prevent recounting
+      } else {
+        stockMap.set(sale.item_id, remainingStock)
+      }
+    }
+  })
+
+  return outOfStockItems
 }
