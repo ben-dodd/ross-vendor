@@ -57,7 +57,7 @@ const handler: NextApiHandler = async (req, res) => {
       AND NOT sale.is_deleted
       AND NOT sale_item.is_deleted
       AND stock.vendor_id = (
-        SELECT id FROM vendor WHERE uid = ?
+       SELECT id FROM vendor WHERE uid = ?
       )
       ORDER BY sale.date_sale_closed DESC
       `,

@@ -10,6 +10,7 @@ import {
 } from '@/lib/types'
 
 import dayjs from 'dayjs'
+import stringSimilarity from 'string-similarity'
 
 export function getItemSku(item: StockObject) {
   return `${('000' + item?.vendor_id || '').slice(-3)}/${(
@@ -375,4 +376,139 @@ export const getOutOfStockItems = (
   })
 
   return outOfStockItems
+}
+// Helper function to normalize strings for comparison
+const normaliseString = (str: string) => {
+  return str
+    .trim()
+    .toLowerCase()
+    .replace(/^the\s+/, '')
+    .replace(',', '')
+}
+
+// Function to check if a title contains a number, indicating it's part of a series or volume
+const hasNumberInTitle = (title: string) => {
+  return /\b\d+\b/.test(title)
+}
+
+// Function to extract a normalized version of the title without its numerical part for comparison
+const normaliseTitleForComparison = (title: string) => {
+  return title.replace(/\b\d+\b/, '').trim()
+}
+
+// Function to extract the design part of the title, assuming the format "SIZE - Design (Colour)"
+const extractDesign = (title: string) => {
+  const parts = title.split(' - ')
+  if (parts.length > 1) {
+    const designPart = parts[1].trim()
+    // Normalize the colors inside parentheses to treat "Black on White" same as "White on Black"
+    const colorMatch = designPart.match(/\(([^)]+)\)$/)
+    if (colorMatch) {
+      const colors = colorMatch[1]
+        .split(' on ')
+        .map((color) => color.trim().toLowerCase())
+        .sort() // Sort alphabetically to normalize
+        .join(' on ')
+      return designPart.replace(/\([^)]+\)$/, `(${colors})`).trim()
+    }
+    return designPart
+  }
+  return title.trim()
+}
+
+// Function to group similar stock items with enhanced title consideration
+export const groupSimilarStockItems = (stockItems: StockData[]) => {
+  const groups: { [key: string]: StockData[] } = {}
+
+  stockItems.forEach((item) => {
+    const normalizedArtist = normaliseString(item.artist)
+    const normalizedTitle = normaliseString(item.title)
+
+    // Determine if the item is a clothing item based on its title format
+    const isClothingItem = item.format.toLowerCase() === 'clothing'
+    const design = isClothingItem ? extractDesign(normalizedTitle) : ''
+
+    const hasNumber = hasNumberInTitle(normalizedTitle)
+    const baseTitle = hasNumber
+      ? normaliseTitleForComparison(normalizedTitle)
+      : normalizedTitle
+
+    // Find existing group with a similar artist and title (or exact match for numbered titles)
+    const existingGroupKey = Object.keys(groups).find((key) => {
+      const [groupArtist, groupTitle, groupTitleWithNumber, groupDesign] =
+        key.split('||')
+
+      const artistMatch =
+        stringSimilarity.compareTwoStrings(groupArtist, normalizedArtist) > 0.8
+
+      if (isClothingItem) {
+        // For clothing items, group by exact design
+        return artistMatch && groupDesign === design
+      } else if (hasNumber) {
+        // If the current title has a number, match must be exact including the number
+        return artistMatch && groupTitleWithNumber === normalizedTitle
+      } else {
+        // Otherwise, allow for fuzzy matching on title
+        return (
+          artistMatch &&
+          stringSimilarity.compareTwoStrings(groupTitle, baseTitle) > 0.8
+        )
+      }
+    })
+
+    if (existingGroupKey) {
+      groups[existingGroupKey].push(item)
+    } else {
+      const groupKey = isClothingItem
+        ? `${normalizedArtist}||${baseTitle}||${normalizedTitle}||${design}`
+        : `${normalizedArtist}||${baseTitle}||${normalizedTitle}`
+      groups[groupKey] = [item]
+    }
+  })
+
+  return Object.values(groups)
+}
+
+// Helper function to get the day of the week and hour
+const getDayOfWeek = (date: string) => dayjs(date).format('ddd')
+const getHourOfDay = (date: string) => dayjs(date).format('H')
+const getMonth = (date: string) => dayjs(date).format('MMM')
+
+export const summariseSalesDataByDayAndHour = (salesData: SaleData[]) => {
+  // Initialize summary object
+  const summary: Record<string, number> = {}
+
+  // Process each sale
+  salesData.forEach((sale) => {
+    const dayOfWeek = getDayOfWeek(sale.date_sale_closed)
+    const hourOfDay = getHourOfDay(sale.date_sale_closed)
+    const label = `${dayOfWeek} ${hourOfDay}` // Format for display
+    const totalSell = sale.total_sell / 100 // Convert to dollars
+
+    if (!summary[label]) {
+      summary[label] = 0
+    }
+    summary[label] += totalSell
+  })
+
+  return summary
+}
+
+export const summariseSalesDataByMonth = (salesData: SaleData[]) => {
+  // Initialize summary object
+  const summary: Record<string, number> = {}
+
+  // Process each sale
+  salesData.forEach((sale) => {
+    const month = getMonth(sale.date_sale_closed)
+    const label = month // Format for display
+    const totalSell = sale.total_sell / 100 // Convert to dollars
+
+    if (!summary[label]) {
+      summary[label] = 0
+    }
+    summary[label] += totalSell
+  })
+
+  return summary
 }
