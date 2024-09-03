@@ -5,10 +5,14 @@ const TableRow = ({ schema, rowData }) => {
         <div
           key={i}
           className={`w-${col?.width || '1'}/12 px-1${
-            col?.line && ' line-through'
-          }`}
+            col?.align === 'right'
+              ? ' text-right'
+              : col?.align === 'center'
+              ? col?.align === ' text-center'
+              : ''
+          }${rowData[col?.field]?.line ? ' line-through' : ''}`}
         >
-          {rowData[col?.field]}
+          {rowData[col?.field]?.value}
         </div>
       ))}
     </div>

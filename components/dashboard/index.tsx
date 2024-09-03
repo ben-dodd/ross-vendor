@@ -16,21 +16,21 @@ import SalesMonthChart from '../charts/monthsChart'
 const Dashboard = ({ sales, payments, stock }) => {
   const totalTake = sumPrices(sales, null, 'vendorPrice')
   const totalPaid = payments?.reduce((prev, pay) => prev + pay?.amount, 0)
-  const paymentSummary = summarisePaymentData(payments)
+  // const paymentSummary = summarisePaymentData(payments)
   const salesSummary = summariseSalesData(sales)
-  const salesSummaryHours = summariseSalesDataByDayAndHour(sales)
-  const salesSummaryMonths = summariseSalesDataByMonth(sales)
-  const similarStock = groupSimilarStockItems(stock)
-  console.log(salesSummaryMonths)
-  console.log(similarStock?.filter((list) => list?.length > 1))
+  // const salesSummaryHours = summariseSalesDataByDayAndHour(sales)
+  // const salesSummaryMonths = summariseSalesDataByMonth(sales)
+  // const similarStock = groupSimilarStockItems(stock)
+  // console.log(salesSummaryMonths)
+  // console.log(similarStock?.filter((list) => list?.length > 1))
   return (
     <div>
       <SaleSummary totalTake={totalTake} totalPaid={totalPaid} />
       <SalesChart salesSummary={salesSummary} />
-      <PaymentsChart paymentSummary={paymentSummary} />
+      {/* <PaymentsChart paymentSummary={paymentSummary} />
       <SalesCumChart salesSummary={salesSummary} />
       <SalesDayHourChart salesSummary={salesSummaryHours} />
-      <SalesMonthChart salesSummary={salesSummaryMonths} />
+      <SalesMonthChart salesSummary={salesSummaryMonths} /> */}
     </div>
   )
 }

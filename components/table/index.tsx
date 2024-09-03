@@ -12,15 +12,19 @@ const Table = ({
 }) => {
   return (
     <div>
-      {showHeader && <TableHeader schema={schema} />}
-      {data?.map((row, i) => (
-        <TableRow key={i} rowData={row} schema={schema} />
-      ))}
       {showPagination && (
         <TablePagination
           pagination={pagination}
           setPagination={setPagination}
         />
+      )}
+      {showHeader && <TableHeader schema={schema} />}
+      {data?.length === 0 ? (
+        <div className="font-bold text-center w-full p-2">{`NO ROWS FOUND`}</div>
+      ) : (
+        data?.map((row, i) => (
+          <TableRow key={i} rowData={row} schema={schema} />
+        ))
       )}
     </div>
   )

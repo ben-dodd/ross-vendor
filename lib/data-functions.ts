@@ -425,7 +425,7 @@ export const groupSimilarStockItems = (stockItems: StockData[]) => {
     const normalizedTitle = normaliseString(item.title)
 
     // Determine if the item is a clothing item based on its title format
-    const isClothingItem = item.format.toLowerCase() === 'clothing'
+    const isClothingItem = item?.format?.toLowerCase() === 'clothing'
     const design = isClothingItem ? extractDesign(normalizedTitle) : ''
 
     const hasNumber = hasNumberInTitle(normalizedTitle)
