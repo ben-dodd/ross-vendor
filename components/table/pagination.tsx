@@ -30,7 +30,7 @@ const Pagination = ({ pagination, setPagination }: PaginationProps) => {
   }
 
   return (
-    <div className="flex justify-between items-center py-2 px-4 bg-black text-white text-xs mb-1">
+    <div className="flex justify-between items-center py-2 px-4 bg-black text-white text-xs border-b border-white border-1">
       <button
         onClick={handlePreviousClick}
         disabled={currentPage === 1}

@@ -1,13 +1,22 @@
 import PaymentItem from './item'
 import Title from '../layout/title'
 import PaymentsTableHeader from './tableHeader'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import dayjs from 'dayjs'
 import { downloadCsv, generateCsv } from '@/lib/csv'
 import Search from '../input/search'
 import DatePicker from '../input/datePicker'
 import Select from '../input/select'
 import { filterByDates } from '@/lib/data-functions'
+import {
+  csvSchema,
+  filterPayments,
+  sortOptions,
+  tablePayments,
+  tableSchema,
+} from './schema'
+import Table from '../table'
+import { PaginationState } from '../table/types'
 
 export default function Payments({ payments }) {
   const [search, setSearch] = useState('')
@@ -15,57 +24,50 @@ export default function Payments({ payments }) {
   const [endDate, setEndDate] = useState(dayjs().format('YYYY-MM-DD'))
   const [filteredPayments, setFilteredPayments] = useState(payments)
   const [sortOption, setSortOption] = useState('date')
+  const [pagination, setPagination] = useState<PaginationState>({
+    currentPage: 1,
+    rowsPerPage: 10,
+    totalRows: null,
+    totalPages: null,
+  })
+
+  useEffect(
+    () =>
+      setPagination((prev) => ({
+        ...prev,
+        totalRows: filteredPayments?.length,
+        totalPages:
+          pagination?.rowsPerPage === 'all'
+            ? 1
+            : Math.ceil(filteredPayments?.length / pagination?.rowsPerPage),
+      })),
+    [pagination?.rowsPerPage, filteredPayments?.length]
+  )
+  const rowsPerPageNumber =
+    typeof pagination.rowsPerPage === 'number'
+      ? pagination.rowsPerPage
+      : filteredPayments.length
+  const startIndex = (pagination?.currentPage - 1) * rowsPerPageNumber
+  const endIndex = startIndex + rowsPerPageNumber
+  const paginatedData = filteredPayments.slice(startIndex, endIndex)
+
+  const resetPagination = () =>
+    setPagination((prev) => ({ ...prev, currentPage: 1 }))
+
+  const handleSetSearch = (val) => {
+    setSearch(val)
+    resetPagination()
+  }
 
   useEffect(() => {
-    const filtered = filterByDates(
-      payments,
-      startDate,
-      endDate,
-      'date'
-    )?.filter(
-      (payment) =>
-        search === '' ||
-        `${payment?.type} ${payment?.reference}`
-          ?.toLowerCase()
-          ?.includes(search?.toLowerCase())
-    )
     setFilteredPayments(
-      filtered.sort((a, b) => {
-        switch (sortOption) {
-          case 'dateRev':
-            return dayjs(a.date).diff(dayjs(b.date)) // Oldest to Newest
-          case 'type':
-            return a.type.localeCompare(b.type) // Sort by Type
-          case 'reference':
-            return a.reference.localeCompare(b.reference) // Sort by reference
-          case 'amount':
-            return a.amount - b.amount // Sort by Price (assuming amount is the price)
-          case 'amountRev':
-            return b.amount - a.amount // Sort by Price (assuming amount is the price)
-          default:
-            return 0 // No sorting if the key doesn't match any case
-        }
-      })
+      filterPayments(payments, startDate, endDate, search, sortOption)
     )
   }, [payments, startDate, endDate, search, sortOption])
 
-  const sortOptions = [
-    { value: 'date', label: 'Date (Newest to Oldest)' },
-    { value: 'dateRev', label: 'Date (Oldest to Newest)' },
-    { value: 'type', label: 'Payment Type' },
-    { value: 'amount', label: 'Amount (Low to High)' },
-    { value: 'amountRev', label: 'Amount (High to Low)' },
-    { value: 'reference', label: 'Reference' },
-  ]
+  const tableData = useMemo(() => tablePayments(paginatedData), [paginatedData])
 
-  const csvSchema = [
-    { header: 'Payment Date', field: 'date', format: 'D MMMM YYYY' },
-    { header: 'Payment Type', field: 'type' },
-    { header: 'Payment Amount (NZD)', field: 'amount', format: '$' },
-    { header: 'Reference', field: 'reference' },
-  ]
   const csvContent = generateCsv(payments, csvSchema)
-
   const downloadData = () =>
     downloadCsv(csvContent, `ross-payments-${dayjs()?.format('YYYY-MM-DD')}`)
 
@@ -76,7 +78,11 @@ export default function Payments({ payments }) {
         downloadData={downloadData}
       />
       <div className="flex justify-between items-end space-x-8 py-2">
-        <Search value={search} setValue={setSearch} label="SEARCH PAYMENTS" />
+        <Search
+          value={search}
+          setValue={handleSetSearch}
+          label="SEARCH PAYMENTS"
+        />
         <DatePicker
           startDate={startDate}
           endDate={endDate}
@@ -90,16 +96,12 @@ export default function Payments({ payments }) {
           onChange={(val) => setSortOption(val)}
         />
       </div>
-      {filteredPayments?.length === 0 ? (
-        <div>NO PAYMENTS FOUND</div>
-      ) : (
-        <div>
-          <PaymentsTableHeader />
-          {filteredPayments?.map((pay, i) => (
-            <PaymentItem key={i} pay={pay} />
-          ))}
-        </div>
-      )}
+      <Table
+        data={tableData}
+        schema={tableSchema}
+        pagination={pagination}
+        setPagination={setPagination}
+      />
     </div>
   )
 }

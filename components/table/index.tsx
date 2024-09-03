@@ -12,13 +12,15 @@ const Table = ({
 }) => {
   return (
     <div>
-      {showPagination && (
-        <TablePagination
-          pagination={pagination}
-          setPagination={setPagination}
-        />
-      )}
-      {showHeader && <TableHeader schema={schema} />}
+      <div className="sticky top-0 w-full">
+        {showPagination && (
+          <TablePagination
+            pagination={pagination}
+            setPagination={setPagination}
+          />
+        )}
+        {showHeader && <TableHeader schema={schema} />}
+      </div>
       {data?.length === 0 ? (
         <div className="font-bold text-center w-full p-2">{`NO ROWS FOUND`}</div>
       ) : (

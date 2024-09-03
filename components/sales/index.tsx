@@ -13,7 +13,7 @@ import {
   tableSales,
   tableSchema,
 } from './schema'
-import { PaginationProps, PaginationState } from '../table/types'
+import { PaginationState } from '../table/types'
 
 export default function Sales({ sales }) {
   const [search, setSearch] = useState('')
@@ -62,10 +62,9 @@ export default function Sales({ sales }) {
     )
   }, [sales, startDate, endDate, search, sortOption, pagination])
 
-  const csvContent = generateCsv(sales, csvSchema)
-
   const tableData = useMemo(() => tableSales(paginatedData), [paginatedData])
 
+  const csvContent = generateCsv(sales, csvSchema)
   const downloadData = () =>
     downloadCsv(csvContent, `ross-sales-${dayjs()?.format('YYYY-MM-DD')}`)
 

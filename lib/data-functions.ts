@@ -99,7 +99,10 @@ export function writePrice(cents, omitDollarSign = false) {
   if (isNaN(parsedCents) || parsedCents === null || parsedCents === undefined) {
     return ''
   }
-  return `${omitDollarSign ? '' : '$'}${(parsedCents / 100).toFixed(2)}`
+  const negative = parsedCents < 0
+  return `${negative ? '-' : ''}${omitDollarSign ? '' : '$'}${(
+    Math.abs(parsedCents) / 100
+  ).toFixed(2)}`
 }
 
 export function getCartItemPrice(cartItem: any, item: StockObject) {
