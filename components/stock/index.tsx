@@ -1,13 +1,19 @@
 import dayjs from 'dayjs'
-import StockItem from './item'
 import Title from '../layout/title'
-import { useEffect, useState } from 'react'
-import { filterByDates } from '@/lib/data-functions'
+import { useEffect, useMemo, useState } from 'react'
 import DatePicker from '../input/datePicker'
 import Search from '../input/search'
 import Select from '../input/select'
-import StockTableHeader from './tableHeader'
 import { downloadCsv, generateCsv } from '@/lib/csv'
+import {
+  csvSchema,
+  filterStock,
+  sortOptions,
+  tableSchema,
+  tableStock,
+} from './schema'
+import Table from '../table'
+import { PaginationState } from '../table/types'
 
 export default function Stock({ stock }) {
   const [search, setSearch] = useState('')
@@ -15,93 +21,48 @@ export default function Stock({ stock }) {
   const [endDate, setEndDate] = useState(dayjs().format('YYYY-MM-DD'))
   const [filteredStock, setFilteredStock] = useState(stock)
   const [sortOption, setSortOption] = useState('sku')
+  const [pagination, setPagination] = useState<PaginationState>({
+    currentPage: 1,
+    rowsPerPage: 10,
+    totalRows: null,
+    totalPages: null,
+  })
+
+  useEffect(
+    () =>
+      setPagination((prev) => ({
+        ...prev,
+        totalRows: filteredStock?.length,
+        totalPages:
+          pagination?.rowsPerPage === 'all'
+            ? 1
+            : Math.ceil(filteredStock?.length / pagination?.rowsPerPage),
+      })),
+    [pagination?.rowsPerPage, filteredStock?.length]
+  )
+  const rowsPerPageNumber =
+    typeof pagination.rowsPerPage === 'number'
+      ? pagination.rowsPerPage
+      : filteredStock.length
+  const startIndex = (pagination?.currentPage - 1) * rowsPerPageNumber
+  const endIndex = startIndex + rowsPerPageNumber
+  const paginatedData = filteredStock.slice(startIndex, endIndex)
+
+  const resetPagination = () =>
+    setPagination((prev) => ({ ...prev, currentPage: 1 }))
+
+  const handleSetSearch = (val) => {
+    setSearch(val)
+    resetPagination()
+  }
 
   useEffect(() => {
-    const filtered = stock?.filter(
-      (item) =>
-        search === '' ||
-        `${item?.artist} ${item?.title}`
-          ?.toLowerCase()
-          ?.includes(search?.toLowerCase())
-    )
-    setFilteredStock(
-      filtered.sort((a, b) => {
-        switch (sortOption) {
-          case 'sku':
-            return a.sku.localeCompare(b.sku) // Sort by SKU
-          case 'artist':
-            return a.artist.localeCompare(b.artist) // Sort by Artist
-          case 'title':
-            return a.title.localeCompare(b.title) // Sort by Title
-          case 'format':
-            return a.format.localeCompare(b.format) // Sort by Format
-          case 'vendorCut':
-            return a.vendor_cut - b.vendor_cut // Sort by Vendor Cut
-          case 'vendorCutRev':
-            return b.vendor_cut - a.vendor_cut // Sort by Vendor Cut (Descending)
-          case 'price':
-            return a.total_sell - b.total_sell // Sort by Total Sell
-          case 'priceRev':
-            return b.total_sell - a.total_sell // Sort by Total Sell (Descending)
-          case 'storeCut':
-            return a.store_cut - b.store_cut // Sort by Store Cut
-          case 'storeCutRev':
-            return b.store_cut - a.store_cut // Sort by Store Cut (Descending)
-          case 'margin':
-            return a.margin - b.margin // Sort by Margin
-          case 'marginRev':
-            return b.margin - a.margin // Sort by Margin (Descending)
-          case 'quantity':
-            return a.quantity - b.quantity // Sort by Quantity
-          case 'quantityRev':
-            return b.quantity - a.quantity // Sort by Quantity (Descending)
-          case 'quantitySold':
-            return a.quantity_sold - b.quantity_sold // Sort by Quantity Sold
-          case 'quantitySoldRev':
-            return b.quantity_sold - a.quantity_sold // Sort by Quantity Sold (Descending)
-          default:
-            return 0 // No sorting if the key doesn't match any case
-        }
-      })
-    )
-  }, [stock, startDate, endDate, search, sortOption])
+    setFilteredStock(filterStock(stock, search, sortOption))
+  }, [stock, search, sortOption])
 
-  const sortOptions = [
-    { value: 'sku', label: 'SKU' },
-    { value: 'artist', label: 'Artist' },
-    { value: 'title', label: 'Title' },
-    { value: 'format', label: 'Format' },
-    { value: 'vendorCut', label: 'Vendor Cut (Low to High)' },
-    { value: 'vendorCutRev', label: 'Vendor Cut (High to Low)' },
-    { value: 'price', label: 'Total Sell (Low to High)' },
-    { value: 'priceRev', label: 'Total Sell (High to Low)' },
-    { value: 'storeCut', label: 'Store Cut (Low to High)' },
-    { value: 'storeCutRev', label: 'Store Cut (High to Low)' },
-    { value: 'margin', label: 'Margin (Low to High)' },
-    { value: 'marginRev', label: 'Margin (High to Low)' },
-    { value: 'quantity', label: 'Quantity (Low to High)' },
-    { value: 'quantityRev', label: 'Quantity (High to Low)' },
-    { value: 'quantitySold', label: 'Quantity Sold (Low to High)' },
-    { value: 'quantitySoldRev', label: 'Quantity Sold (High to Low)' },
-  ]
-
-  const csvSchema = [
-    { header: 'SKU', field: 'sku' },
-    { header: 'Artist', field: 'artist' },
-    { header: 'Title', field: 'title' },
-    { header: 'Format', field: 'format' },
-    { header: 'New', field: 'is_new' },
-    { header: 'Condition', field: 'cond' },
-    { header: 'Vendor Cut (NZD)', field: 'vendor_cut', format: '$' },
-    { header: 'Total Sell (NZD)', field: 'total_sell', format: '$' },
-    { header: 'Store Cut (NZD)', field: 'store_cut', format: '$' },
-    { header: 'Margin', field: 'margin', format: '%' },
-    { header: 'Quantity', field: 'quantity' },
-    { header: 'Quantity Sold', field: 'quantity_sold' },
-  ]
+  const tableData = useMemo(() => tableStock(paginatedData), [paginatedData])
 
   const csvContent = generateCsv(stock, csvSchema)
-
   const downloadData = () =>
     downloadCsv(csvContent, `ross-stock-${dayjs()?.format('YYYY-MM-DD')}`)
 
@@ -123,16 +84,12 @@ export default function Stock({ stock }) {
           onChange={(val) => setSortOption(val)}
         />
       </div>
-      {filteredStock?.length === 0 ? (
-        <div>NO STOCK FOUND</div>
-      ) : (
-        <div>
-          <StockTableHeader />
-          {filteredStock?.map((item, i) => (
-            <StockItem key={i} item={item} />
-          ))}
-        </div>
-      )}
+      <Table
+        data={tableData}
+        schema={tableSchema}
+        pagination={pagination}
+        setPagination={setPagination}
+      />
     </div>
   )
 }

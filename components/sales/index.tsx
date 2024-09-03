@@ -57,10 +57,8 @@ export default function Sales({ sales }) {
   }
 
   useEffect(() => {
-    setFilteredSales(
-      filterSales(sales, startDate, endDate, search, sortOption, pagination)
-    )
-  }, [sales, startDate, endDate, search, sortOption, pagination])
+    setFilteredSales(filterSales(sales, startDate, endDate, search, sortOption))
+  }, [sales, startDate, endDate, search, sortOption])
 
   const tableData = useMemo(() => tableSales(paginatedData), [paginatedData])
 

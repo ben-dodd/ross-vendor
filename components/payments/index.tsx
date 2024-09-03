@@ -1,13 +1,10 @@
-import PaymentItem from './item'
 import Title from '../layout/title'
-import PaymentsTableHeader from './tableHeader'
 import { useEffect, useMemo, useState } from 'react'
 import dayjs from 'dayjs'
 import { downloadCsv, generateCsv } from '@/lib/csv'
 import Search from '../input/search'
 import DatePicker from '../input/datePicker'
 import Select from '../input/select'
-import { filterByDates } from '@/lib/data-functions'
 import {
   csvSchema,
   filterPayments,

@@ -62,14 +62,7 @@ export const tableSales = (sales) =>
     margin: { value: sale?.margin && `${sale?.margin?.toFixed?.(1)}%` },
   }))
 
-export const filterSales = (
-  sales,
-  startDate,
-  endDate,
-  search,
-  sortOption,
-  pagination
-) => {
+export const filterSales = (sales, startDate, endDate, search, sortOption) => {
   return filterByDates(sales, startDate, endDate, 'date_sale_closed')
     ?.filter(
       (sale) =>
