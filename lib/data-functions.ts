@@ -94,15 +94,25 @@ export function sumPrices(
       return (acc += prices?.[field])
     }, 0)
 }
-export function writePrice(cents, omitDollarSign = false) {
+export function writePrice(
+  cents: number | string,
+  omitDollarSign = false
+): string {
   const parsedCents = typeof cents === 'string' ? parseFloat(cents) : cents
   if (isNaN(parsedCents) || parsedCents === null || parsedCents === undefined) {
     return ''
   }
+
   const negative = parsedCents < 0
-  return `${negative ? '-' : ''}${omitDollarSign ? '' : '$'}${(
-    Math.abs(parsedCents) / 100
-  ).toFixed(2)}`
+  const absoluteValue = Math.abs(parsedCents) / 100
+
+  // Format the number with commas and two decimal places
+  const formattedValue = absoluteValue.toLocaleString('en-NZ', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })
+
+  return `${negative ? '-' : ''}${omitDollarSign ? '' : '$'}${formattedValue}`
 }
 
 export function getCartItemPrice(cartItem: any, item: StockObject) {
@@ -210,9 +220,9 @@ const getAllMonths = (
 
   return months
 }
-// Sales summary function with month processing and format categorisation
 export const summariseSalesData = (
-  salesData: SaleData[]
+  salesData: SaleData[],
+  numFormats: number
 ): SaleMonthlySummary[] => {
   // Get min and max dates from the sales data
   const minDate = dayjs.min(
@@ -266,25 +276,25 @@ export const summariseSalesData = (
     summary[month].totalVendorCut += vendorCut
   })
 
-  // Collect all formats and their totals
-  const formatTotals: Record<string, { totalQuantity: number }> = {}
+  // Collect all formats and their total vendor cuts
+  const formatTotals: Record<string, { totalVendorCut: number }> = {}
 
   Object.values(summary).forEach((monthData) => {
     Object.entries(monthData.formatDetails).forEach(([format, data]) => {
       if (!formatTotals[format]) {
-        formatTotals[format] = { totalQuantity: 0 }
+        formatTotals[format] = { totalVendorCut: 0 }
       }
-      formatTotals[format].totalQuantity += data.totalQuantity
+      formatTotals[format].totalVendorCut += data.totalVendorCut
     })
   })
 
-  // Determine top 5 formats overall
+  // Determine top formats by total vendor cut
   const topFormats = Object.entries(formatTotals)
-    .sort((a, b) => b[1].totalQuantity - a[1].totalQuantity)
-    .slice(0, 5)
+    .sort((a, b) => b[1].totalVendorCut - a[1].totalVendorCut)
+    .slice(0, numFormats)
     .map(([format]) => format)
 
-  // Update summaries to include only top 5 formats and an "Other" category
+  // Update summaries to include only top formats and an "Other" category
   Object.values(summary).forEach((monthData) => {
     const updatedFormatDetails: Record<string, any> = {}
     const otherSummary = {

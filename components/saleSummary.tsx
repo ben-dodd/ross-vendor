@@ -2,7 +2,7 @@ import { writePrice } from '@/lib/data-functions'
 
 const SaleSummary = ({ totalTake, totalPaid }) => {
   return (
-    <div className="mb-2 md:flex md:justify-between">
+    <div className="mb-2 flex justify-between">
       <div />
       <div className="w-full text-sm font-bold text-right md:w-2/5">
         <div className="w-full flex">

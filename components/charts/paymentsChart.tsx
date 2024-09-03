@@ -9,7 +9,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js'
-// import zoomPlugin from 'chartjs-plugin-zoom'
+import dayjs from 'dayjs'
 import { useEffect, useRef } from 'react'
 
 // Register necessary Chart.js components
@@ -21,21 +21,38 @@ Chart.register(
   Title,
   Tooltip,
   Legend
-  // zoomPlugin
 )
 
 type PaymentsChartProps = {
   paymentSummary: PaymentMonthlySummary[]
+  startDate: string
+  endDate: string
 }
 
-const PaymentsChart = ({ paymentSummary }: PaymentsChartProps) => {
+const PaymentsChart = ({
+  paymentSummary,
+  startDate,
+  endDate,
+}: PaymentsChartProps) => {
   const chartRef = useRef<HTMLCanvasElement | null>(null)
 
+  // Filter paymentSummary based on startDate and endDate
+  const filteredSummary = paymentSummary.filter((item) => {
+    const monthStart = dayjs(item.month, 'YYYY-MM').startOf('month')
+    const monthEnd = dayjs(item.month, 'YYYY-MM').endOf('month')
+    return (
+      monthStart.isSameOrAfter(dayjs(startDate)) &&
+      monthEnd.isSameOrBefore(dayjs(endDate))
+    )
+  })
+
   // Prepare chart labels (months)
-  const labels = paymentSummary.map((item) => item.month)
+  const labels = filteredSummary.map((item) => item.month)
 
   // Prepare data for total payments
-  const totalPaymentsData = paymentSummary.map((item) => item.totalAmount / 100) // Convert cents to dollars
+  const totalPaymentsData = filteredSummary.map(
+    (item) => item.totalAmount / 100
+  ) // Convert cents to dollars
 
   useEffect(() => {
     const ctx = chartRef.current?.getContext('2d')
@@ -55,13 +72,13 @@ const PaymentsChart = ({ paymentSummary }: PaymentsChartProps) => {
         },
         options: {
           responsive: true,
-          animation: false, // Disable the opening animation
+          animation: false,
           plugins: {
             legend: {
               position: 'top',
             },
             title: {
-              display: true,
+              display: false,
               text: 'Monthly Total Payments',
             },
             tooltip: {
@@ -71,21 +88,6 @@ const PaymentsChart = ({ paymentSummary }: PaymentsChartProps) => {
                   const value = tooltipItem.raw as number
                   return `${label}: $${value.toFixed(2)}`
                 },
-              },
-            },
-            zoom: {
-              zoom: {
-                wheel: {
-                  enabled: true, // Enable zooming with mouse wheel
-                },
-                pinch: {
-                  enabled: true, // Enable zooming with pinch gestures
-                },
-                mode: 'x', // Zoom in both x and y axes
-              },
-              pan: {
-                enabled: true, // Enable panning
-                mode: 'x', // Pan in both x and y axes
               },
             },
           },
@@ -99,12 +101,10 @@ const PaymentsChart = ({ paymentSummary }: PaymentsChartProps) => {
             y: {
               title: {
                 display: true,
-                text: 'Total Payments in $NZD', // Add y-axis label
+                text: 'Total Payments in $NZD',
               },
               ticks: {
-                callback: (value) => {
-                  return `$${value.toFixed(0)}` // Convert to dollars and format
-                },
+                callback: (value) => `$${value?.toFixed?.(0)}`, // Convert to dollars and format
               },
             },
           },
@@ -112,13 +112,12 @@ const PaymentsChart = ({ paymentSummary }: PaymentsChartProps) => {
       })
     }
 
-    // Cleanup on component unmount
     return () => {
       if (ctx) {
         Chart.getChart(ctx)?.destroy()
       }
     }
-  }, [paymentSummary]) // Add paymentSummary as a dependency
+  }, [filteredSummary, startDate, endDate])
 
   return <canvas ref={chartRef} />
 }

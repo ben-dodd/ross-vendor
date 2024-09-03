@@ -9,6 +9,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js'
+import dayjs from 'dayjs'
 import { useEffect, useRef } from 'react'
 
 // Register necessary Chart.js components
@@ -22,17 +23,30 @@ Chart.register(
   Legend
 )
 
-type SalesChartProps = {
+type SalesCumChartProps = {
   salesSummary: SaleMonthlySummary[]
+  startDate: string
+  endDate: string
 }
 
-const SalesChart = ({ salesSummary }: SalesChartProps) => {
+const SalesCumChart = ({
+  salesSummary,
+  startDate,
+  endDate,
+}: SalesCumChartProps) => {
   const chartRef = useRef<HTMLCanvasElement | null>(null)
 
-  // Prepare chart labels (months)
-  const labels = salesSummary.map((item) => item.month) // Assume `month` is a string like 'January', 'February', etc.
+  // Filter salesSummary based on startDate and endDate
+  const filteredSummary = salesSummary.filter((item) => {
+    const monthStart = dayjs(item.month, 'YYYY-MM').startOf('month')
+    const monthEnd = dayjs(item.month, 'YYYY-MM').endOf('month')
+    return (
+      monthStart.isSameOrAfter(dayjs(startDate)) &&
+      monthEnd.isSameOrBefore(dayjs(endDate))
+    )
+  })
 
-  // Calculate cumulative vendor cuts
+  // Ensure filteredSummary includes months before startDate to calculate cumulative data correctly
   const cumulativeData = salesSummary.reduce((acc, item) => {
     const lastValue =
       acc.length > 0 ? acc[acc.length - 1].cumulativeVendorCut : 0
@@ -40,14 +54,23 @@ const SalesChart = ({ salesSummary }: SalesChartProps) => {
       acc.length > 0 ? acc[acc.length - 1].cumulativeStoreCut : 0
     acc.push({
       month: item.month,
-      cumulativeVendorCut: lastValue + item.totalVendorCut,
-      cumulativeStoreCut: lastStoreValue + item.totalStoreCut,
+      cumulativeVendorCut: lastValue + (item.totalVendorCut || 0),
+      cumulativeStoreCut: lastStoreValue + (item.totalStoreCut || 0),
     })
     return acc
   }, [] as { month: string; cumulativeVendorCut: number; cumulativeStoreCut: number }[])
 
-  const vendorCutData = cumulativeData.map((d) => d.cumulativeVendorCut)
-  const storeCutData = cumulativeData.map((d) => d.cumulativeStoreCut)
+  // Filter cumulative data based on startDate and endDate
+  const filteredCumulativeData = cumulativeData.filter((item) => {
+    const monthStart = dayjs(item.month, 'YYYY-MM').startOf('month')
+    return (
+      monthStart.isSameOrAfter(dayjs(startDate)) &&
+      monthStart.isSameOrBefore(dayjs(endDate))
+    )
+  })
+
+  const vendorCutData = filteredCumulativeData.map((d) => d.cumulativeVendorCut)
+  const storeCutData = filteredCumulativeData.map((d) => d.cumulativeStoreCut)
 
   useEffect(() => {
     const ctx = chartRef.current?.getContext('2d')
@@ -56,7 +79,7 @@ const SalesChart = ({ salesSummary }: SalesChartProps) => {
       new Chart(ctx, {
         type: 'line',
         data: {
-          labels: cumulativeData.map((d) => d.month),
+          labels: filteredCumulativeData.map((d) => d.month),
           datasets: [
             {
               label: 'Cumulative Vendor Cut',
@@ -76,13 +99,13 @@ const SalesChart = ({ salesSummary }: SalesChartProps) => {
         },
         options: {
           responsive: true,
+          animation: false,
           plugins: {
             legend: {
               position: 'top',
             },
             title: {
-              display: true,
-              text: 'Cumulative Vendor and Store Cut Over Time',
+              display: false, // Hide the title
             },
             tooltip: {
               callbacks: {
@@ -99,14 +122,13 @@ const SalesChart = ({ salesSummary }: SalesChartProps) => {
                 display: true,
                 text: 'Month',
               },
-              // Set the x-axis type to 'category' for discrete labels
               type: 'category',
-              labels: labels, // Use month labels
+              labels: filteredCumulativeData.map((d) => d.month),
             },
             y: {
               title: {
                 display: true,
-                text: 'Vendor Cut in $NZD',
+                text: 'Cut in $NZD',
               },
               beginAtZero: true,
               ticks: {
@@ -124,9 +146,9 @@ const SalesChart = ({ salesSummary }: SalesChartProps) => {
         Chart.getChart(ctx)?.destroy()
       }
     }
-  }, [salesSummary]) // Add salesSummary as a dependency
+  }, [filteredCumulativeData, startDate, endDate]) // Add filteredCumulativeData, startDate, and endDate as dependencies
 
   return <canvas ref={chartRef} />
 }
 
-export default SalesChart
+export default SalesCumChart

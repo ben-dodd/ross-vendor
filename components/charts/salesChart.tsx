@@ -9,10 +9,9 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js'
-// import zoomPlugin from 'chartjs-plugin-zoom'
+import dayjs from 'dayjs'
 import { useEffect, useRef } from 'react'
 
-// Register necessary Chart.js components and zoom plugin
 Chart.register(
   BarController,
   BarElement,
@@ -21,18 +20,29 @@ Chart.register(
   Title,
   Tooltip,
   Legend
-  // zoomPlugin
 )
 
 type SalesChartProps = {
   salesSummary: SaleMonthlySummary[]
+  startDate: string
+  endDate: string
 }
 
-const SalesChart = ({ salesSummary }: SalesChartProps) => {
+const SalesChart = ({ salesSummary, startDate, endDate }: SalesChartProps) => {
   const chartRef = useRef<HTMLCanvasElement | null>(null)
 
+  // Filter salesSummary based on startDate and endDate
+  const filteredSummary = salesSummary.filter((item) => {
+    const monthStart = dayjs(item.month, 'YYYY-MM').startOf('month')
+    const monthEnd = dayjs(item.month, 'YYYY-MM').endOf('month')
+    return (
+      monthStart.isSameOrAfter(dayjs(startDate)) &&
+      monthEnd.isSameOrBefore(dayjs(endDate))
+    )
+  })
+
   // Prepare chart labels (months)
-  const labels = salesSummary.map((item) => item.month)
+  const labels = filteredSummary.map((item) => item.month)
 
   // Prepare format colours
   const colours = [
@@ -42,37 +52,48 @@ const SalesChart = ({ salesSummary }: SalesChartProps) => {
     '#e78ac3',
     '#a6d854',
     '#ffd92f',
+    '#e5c494',
+    '#b3b3b3',
+    '#ff69b4',
   ]
 
-  // Prepare data for vendor cut by format, stacked by format
-  const formats = new Set<string>()
-  salesSummary.forEach((item) => {
-    Object.keys(item.formatDetails).forEach((format) => formats.add(format))
+  // Collect all formats and their total vendor cuts
+  const formatTotals: Record<string, number> = {}
+
+  filteredSummary.forEach((item) => {
+    Object.entries(item.formatDetails).forEach(([format, data]) => {
+      if (!formatTotals[format]) {
+        formatTotals[format] = 0
+      }
+      formatTotals[format] += data.totalVendorCut
+    })
   })
 
-  const formatDetails = Array.from(formats).map((format, index) => ({
-    label: format,
-    data: salesSummary.map(
-      (item) => item.formatDetails[format]?.totalVendorCut || 0
-    ),
-    stack: 'Stack 1',
-    backgroundColor: colours[index % colours.length], // Use the provided colours
-  }))
+  // Determine top formats by total vendor cut
+  const sortedFormats = Object.entries(formatTotals)
+    .sort((a, b) => b[1] - a[1]) // Sort by total vendor cut in descending order
+    .slice(0, 8) // Get top 8 formats
+    .map(([format]) => format)
 
-  // Process formats to ensure "Other" is last and on top
-  const sortedFormats = formatDetails.sort((a, b) =>
-    a.label === 'Other' ? 1 : -1
+  // Prepare data for vendor cut by format, stacked by format
+  const formatDetails = Array.from(new Set([...sortedFormats, 'Other'])).map(
+    (format, index) => ({
+      label: format,
+      data: filteredSummary.map((item) =>
+        format === 'Other'
+          ? Object.entries(item.formatDetails).reduce((sum, [fmt, data]) => {
+              if (!sortedFormats.includes(fmt)) {
+                return sum + data.totalVendorCut
+              }
+              return sum
+            }, 0)
+          : item.formatDetails[format]?.totalVendorCut || 0
+      ),
+      stack: 'Stack 1',
+      backgroundColor:
+        format === 'Other' ? '#b3b3b3' : colours[index % colours.length],
+    })
   )
-
-  // Ensure "Other" format is added last
-  if (formats.size > 5) {
-    const otherFormat = sortedFormats.find((format) => format.label === 'Other')
-    const topFormats = sortedFormats.filter(
-      (format) => format.label !== 'Other'
-    )
-    sortedFormats.length = 0 // Clear the array
-    sortedFormats.push(...topFormats, otherFormat) // Add top formats first, then "Other"
-  }
 
   useEffect(() => {
     const ctx = chartRef.current?.getContext('2d')
@@ -82,7 +103,7 @@ const SalesChart = ({ salesSummary }: SalesChartProps) => {
         type: 'bar',
         data: {
           labels: labels,
-          datasets: sortedFormats,
+          datasets: formatDetails,
         },
         options: {
           responsive: true,
@@ -92,7 +113,7 @@ const SalesChart = ({ salesSummary }: SalesChartProps) => {
               position: 'top',
             },
             title: {
-              display: true,
+              display: false,
               text: 'Monthly Vendor Cuts by Format',
             },
             tooltip: {
@@ -104,23 +125,6 @@ const SalesChart = ({ salesSummary }: SalesChartProps) => {
                 },
               },
             },
-            // zoom: {
-            //   zoom: {
-            //     wheel: {
-            //       enabled: true, // Enable zooming with mouse wheel
-            //     },
-            //     pinch: {
-            //       enabled: true, // Enable zooming with pinch gestures
-            //     },
-            //     // mode: 'xy', // Zoom in both x and y axes
-            //     mode: 'x',
-            //   },
-            //   pan: {
-            //     enabled: true, // Enable panning
-            //     // mode: 'xy', // Pan in both x and y axes
-            //     mode: 'x',
-            //   },
-            // },
           },
           scales: {
             x: {
@@ -133,9 +137,7 @@ const SalesChart = ({ salesSummary }: SalesChartProps) => {
                 text: 'Vendor Cut in $NZD', // Add y-axis label
               },
               ticks: {
-                callback: (value) => {
-                  return `$${value}`
-                },
+                callback: (value) => `$${value}`,
               },
             },
           },
@@ -149,7 +151,7 @@ const SalesChart = ({ salesSummary }: SalesChartProps) => {
         Chart.getChart(ctx)?.destroy()
       }
     }
-  }, [salesSummary]) // Add salesSummary as a dependency
+  }, [filteredSummary, startDate, endDate]) // Add filteredSummary, startDate, and endDate as dependencies
 
   return <canvas ref={chartRef} />
 }
