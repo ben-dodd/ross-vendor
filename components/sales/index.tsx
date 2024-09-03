@@ -1,14 +1,15 @@
 import dayjs from 'dayjs'
 import SalesItem from './item'
 import Title from '../layout/title'
-import { useEffect, useState } from 'react'
-import { filterByDates } from '@/lib/data-functions'
+import { useEffect, useMemo, useState } from 'react'
+import { filterByDates, writePrice } from '@/lib/data-functions'
 import DatePicker from '../input/datePicker'
 import Search from '../input/search'
 import Select from '../input/select'
 import SalesTableHeader from './tableHeader'
 import { downloadCsv, generateCsv } from '@/lib/csv'
 import Selector from '../input/select'
+import Table from '../table'
 
 export default function Sales({ sales }) {
   const [search, setSearch] = useState('')
@@ -16,6 +17,7 @@ export default function Sales({ sales }) {
   const [endDate, setEndDate] = useState(dayjs().format('YYYY-MM-DD'))
   const [filteredSales, setFilteredSales] = useState(sales)
   const [sortOption, setSortOption] = useState('date')
+  const [pagination, setPagination] = useState({ page: 1, numRows: 20 })
 
   useEffect(() => {
     const filtered = filterByDates(
@@ -90,6 +92,45 @@ export default function Sales({ sales }) {
   ]
   const csvContent = generateCsv(sales, csvSchema)
 
+  const tableSchema = [
+    { width: 3, label: 'DATE SOLD', field: 'date' },
+    { width: 1, label: 'STOCK REMAINING', field: 'stockRemaining' },
+    { width: 1, label: 'FORMAT', field: 'format' },
+    { width: 2, label: 'ARTIST', field: 'artist' },
+    { width: 2, label: 'TITLE', field: 'title' },
+    { width: 2, label: 'RETAIL PRICE', align: 'right', field: 'retailPrice' },
+    { width: 1, label: 'ROSS TAKE', align: 'right', field: 'rossTake' },
+    { width: 1, label: 'VENDOR TAKE', align: 'right', field: 'vendorTake' },
+    { width: 1, label: 'MARGIN', align: 'right', field: 'margin' },
+  ]
+
+  const tableData = useMemo(
+    () =>
+      filteredSales?.map((sale) => ({
+        date: { value: dayjs(sale?.date_sale_closed).format('DD/MM/YY') },
+        stockRemaining: { value: sale?.quantity },
+        format: { value: sale?.format },
+        artist: { value: sale?.artist },
+        title: {
+          value: `${sale?.title}${sale?.is_refunded ? ' [REFUNDED]' : ''}`,
+        },
+        retailPrice: {
+          value: writePrice(sale?.total_sell),
+          line: sale?.is_refunded,
+        },
+        rossTake: {
+          value: writePrice(sale?.store_cut),
+          line: sale?.is_refunded,
+        },
+        vendorTake: {
+          value: writePrice(sale?.vendor_cut),
+          line: sale?.is_refunded,
+        },
+        margin: { value: `${sale?.margin?.toFixed?.(1)}%` },
+      })),
+    [filteredSales]
+  )
+
   const downloadData = () =>
     downloadCsv(csvContent, `ross-sales-${dayjs()?.format('YYYY-MM-DD')}`)
   return (
@@ -113,13 +154,12 @@ export default function Sales({ sales }) {
       {filteredSales?.length === 0 ? (
         <div>NO SALES FOUND</div>
       ) : (
-        <div>
-          <SalesTableHeader />
-          {filteredSales?.map((sale, i) => {
-            // console.log(sale)
-            return <SalesItem key={i} sale={sale} />
-          })}
-        </div>
+        <Table
+          data={tableData}
+          schema={tableSchema}
+          pagination={pagination}
+          setPagination={setPagination}
+        />
       )}
     </div>
   )
