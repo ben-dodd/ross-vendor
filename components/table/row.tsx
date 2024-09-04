@@ -4,7 +4,7 @@ const TableRow = ({ schema, rowData }) => {
       {schema?.map((col, i) => (
         <div
           key={i}
-          className={`w-${col?.width || '1'}/12 px-1 flex-none text-pretty${
+          className={`w-${col?.width || '1'}/12 px-1 flex-none${
             col?.align === 'right'
               ? ' text-right pr-2'
               : col?.align === 'center'
