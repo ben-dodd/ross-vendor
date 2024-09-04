@@ -4,13 +4,14 @@ const TableHeader = ({ schema }) => {
       {schema?.map((col, i) => (
         <div
           key={i}
-          className={`w-${col?.width || '1'}/12 px-1 flex-none${
+          className={`px-1 flex-none${
             col?.align === 'right'
               ? ' text-right'
               : col?.align === 'center'
               ? col?.align === ' text-center'
               : ''
           }`}
+          style={{ width: `${col?.width || 80}px` }}
         >
           {col?.label}
         </div>

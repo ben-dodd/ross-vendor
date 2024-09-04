@@ -27,15 +27,15 @@ export const sortOptions = [
 ]
 
 export const tableSchema = [
-  { width: 1, label: 'DATE SOLD', field: 'date' },
-  { width: 1, label: 'QTY SOLD', field: 'qtySold' },
-  { width: 1, label: 'FORMAT', field: 'format' },
-  { width: 2, label: 'ARTIST', field: 'artist' },
-  { width: 3, label: 'TITLE', field: 'title' },
-  { width: 1, label: 'RETAIL PRICE', align: 'right', field: 'retailPrice' },
-  { width: 1, label: 'ROSS TAKE', align: 'right', field: 'rossTake' },
-  { width: 1, label: 'VENDOR TAKE', align: 'right', field: 'vendorTake' },
-  { width: 1, label: 'MARGIN', align: 'right', field: 'margin' },
+  { width: 80, label: 'DATE SOLD', field: 'date' },
+  { width: 64, label: 'QTY SOLD', field: 'qtySold' },
+  { width: 100, label: 'FORMAT', field: 'format' },
+  { width: 200, label: 'ARTIST', field: 'artist' },
+  { width: 300, label: 'TITLE', field: 'title' },
+  { width: 64, label: 'RETAIL PRICE', align: 'right', field: 'retailPrice' },
+  { width: 64, label: 'ROSS TAKE', align: 'right', field: 'rossTake' },
+  { width: 64, label: 'VENDOR TAKE', align: 'right', field: 'vendorTake' },
+  { width: 64, label: 'MARGIN', align: 'right', field: 'margin' },
 ]
 
 export const tableSales = (sales) =>

@@ -4,7 +4,7 @@ const TableRow = ({ schema, rowData }) => {
       {schema?.map((col, i) => (
         <div
           key={i}
-          className={`w-${col?.width || '1'}/12 px-1 flex-none${
+          className={`px-1 flex-none${
             col?.align === 'right'
               ? ' text-right pr-2'
               : col?.align === 'center'
@@ -13,7 +13,7 @@ const TableRow = ({ schema, rowData }) => {
           } ${rowData[col?.field]?.line ? ' line-through' : ''} ${
             rowData[col?.field]?.red ? ' text-red-500' : ''
           }`}
-          style={{ minWidth: '0' }}
+          style={{ width: `${col?.width || 80}px` }}
         >
           {rowData[col?.field]?.value}
         </div>

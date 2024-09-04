@@ -18,10 +18,10 @@ export const sortOptions = [
 ]
 
 export const tableSchema = [
-  { width: 1, label: 'DATE PAID', field: 'date' },
-  { width: 2, label: 'AMOUNT PAID', field: 'amount', align: 'right' },
-  { width: 2, label: 'PAYMENT TYPE', field: 'type' },
-  { width: 7, label: 'REFERENCE', field: 'reference' },
+  { width: 100, label: 'DATE PAID', field: 'date' },
+  { width: 100, label: 'AMOUNT PAID', field: 'amount', align: 'right' },
+  { width: 150, label: 'PAYMENT TYPE', field: 'type' },
+  { width: 650, label: 'REFERENCE', field: 'reference' },
 ]
 
 export const tablePayments = (payments) =>

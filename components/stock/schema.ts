@@ -35,16 +35,16 @@ export const csvSchema = [
 ]
 
 export const tableSchema = [
-  { width: 1, label: 'SKU', field: 'sku' },
-  { width: 2, label: 'ARTIST', field: 'artist' },
-  { width: 2, label: 'TITLE', field: 'title' },
-  { width: 1, label: 'FORMAT', field: 'format' },
-  { width: 1, label: 'CONDITION', field: 'condition' },
-  { width: 1, label: 'VENDOR CUT', field: 'vendorCut', align: 'right' },
-  { width: 1, label: 'TOTAL SELL', field: 'totalSell', align: 'right' },
-  { width: 1, label: 'MARGIN', field: 'margin', align: 'right' },
-  { width: 1, label: 'QTY IN STOCK', field: 'qtyInStock', align: 'right' },
-  { width: 1, label: 'QTY SOLD', field: 'qtySold', align: 'right' },
+  { width: 80, label: 'SKU', field: 'sku' },
+  { width: 180, label: 'ARTIST', field: 'artist' },
+  { width: 250, label: 'TITLE', field: 'title' },
+  { width: 90, label: 'FORMAT', field: 'format' },
+  { width: 80, label: 'CONDITION', field: 'condition' },
+  { width: 64, label: 'VENDOR CUT', field: 'vendorCut', align: 'right' },
+  { width: 64, label: 'TOTAL SELL', field: 'totalSell', align: 'right' },
+  { width: 64, label: 'MARGIN', field: 'margin', align: 'right' },
+  { width: 64, label: 'QTY IN STOCK', field: 'qtyInStock', align: 'right' },
+  { width: 64, label: 'QTY SOLD', field: 'qtySold', align: 'right' },
 ]
 
 export const tableStock = (stock) =>
