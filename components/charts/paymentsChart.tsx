@@ -104,7 +104,7 @@ const PaymentsChart = ({
                 text: 'Total Payments in $NZD',
               },
               ticks: {
-                callback: (value) => `$${value?.toFixed?.(0)}`, // Convert to dollars and format
+                callback: (value) => `$${Number(value)?.toFixed?.(0)}`, // Convert to dollars and format
               },
             },
           },
