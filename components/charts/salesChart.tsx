@@ -10,7 +10,9 @@ import {
   Legend,
 } from 'chart.js'
 import dayjs from 'dayjs'
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { coloursQual, numFormats } from './ref'
+import { getTopSellingFormats } from './functions'
 
 Chart.register(
   BarController,
@@ -29,7 +31,9 @@ type SalesChartProps = {
 }
 
 const SalesChart = ({ salesSummary, startDate, endDate }: SalesChartProps) => {
-  const chartRef = useRef<HTMLCanvasElement | null>(null)
+  const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  const chartRef = useRef<Chart | null>(null)
+  const [activeFormats, setActiveFormats] = useState<string[]>([])
 
   // Filter salesSummary based on startDate and endDate
   const filteredSummary = salesSummary.filter((item) => {
@@ -43,63 +47,63 @@ const SalesChart = ({ salesSummary, startDate, endDate }: SalesChartProps) => {
 
   // Prepare chart labels (months)
   const labels = filteredSummary.map((item) => item.month)
-
-  // Prepare format colours
-  const colours = [
-    '#66c2a5',
-    '#fc8d62',
-    '#8da0cb',
-    '#e78ac3',
-    '#a6d854',
-    '#ffd92f',
-    '#e5c494',
-    '#b3b3b3',
-    '#ff69b4',
-  ]
-
-  // Collect all formats and their total vendor cuts
-  const formatTotals: Record<string, number> = {}
-
-  filteredSummary.forEach((item) => {
-    Object.entries(item.formatDetails).forEach(([format, data]) => {
-      if (!formatTotals[format]) {
-        formatTotals[format] = 0
-      }
-      formatTotals[format] += data.totalVendorCut
-    })
-  })
-
-  // Determine top formats by total vendor cut
-  const sortedFormats = Object.entries(formatTotals)
-    .sort((a, b) => b[1] - a[1]) // Sort by total vendor cut in descending order
-    .slice(0, 8) // Get top 8 formats
-    .map(([format]) => format)
-
-  // Prepare data for vendor cut by format, stacked by format
-  const formatDetails = Array.from(new Set([...sortedFormats, 'Other'])).map(
-    (format, index) => ({
-      label: format,
-      data: filteredSummary.map((item) =>
-        format === 'Other'
-          ? Object.entries(item.formatDetails).reduce((sum, [fmt, data]) => {
-              if (!sortedFormats.includes(fmt)) {
-                return sum + data.totalVendorCut
-              }
-              return sum
-            }, 0)
-          : item.formatDetails[format]?.totalVendorCut || 0
-      ),
-      stack: 'Stack 1',
-      backgroundColor:
-        format === 'Other' ? '#b3b3b3' : colours[index % colours.length],
-    })
+  const sortedFormats = useMemo(
+    () => getTopSellingFormats(filteredSummary),
+    [filteredSummary]
   )
 
-  useEffect(() => {
-    const ctx = chartRef.current?.getContext('2d')
+  useEffect(() => setActiveFormats(sortedFormats), [])
 
-    if (ctx) {
-      new Chart(ctx, {
+  // Toggle format visibility
+  const toggleFormat = (format: string) => {
+    setActiveFormats((prevActiveFormats) =>
+      prevActiveFormats.includes(format)
+        ? prevActiveFormats.filter((f) => f !== format)
+        : [...prevActiveFormats, format]
+    )
+  }
+
+  useEffect(() => {
+    const ctx = canvasRef.current?.getContext('2d')
+    if (!ctx) return
+
+    // Prepare data for vendor cut by format, stacked by format
+    const formatDetails = Array.from(new Set([...sortedFormats, 'Other'])).map(
+      (format, index) => ({
+        label: format,
+        data: filteredSummary.map((item) =>
+          format === 'Other'
+            ? Object.entries(item.formatDetails).reduce((sum, [fmt, data]) => {
+                if (!sortedFormats.includes(fmt)) {
+                  return sum + data.totalVendorCut
+                }
+                return sum
+              }, 0)
+            : item.formatDetails[format]?.totalVendorCut || 0
+        ),
+        stack: 'Stack 1',
+        backgroundColor:
+          format === 'Other'
+            ? '#b3b3b3'
+            : coloursQual[index % coloursQual.length],
+        hidden: !activeFormats.includes(format),
+      })
+    )
+
+    if (chartRef.current) {
+      // If the chart exists, update datasets and visibility
+      formatDetails.forEach((dataset, index) => {
+        const existingDataset = chartRef.current!.data.datasets[index]
+        if (existingDataset) {
+          existingDataset.hidden = dataset.hidden
+        } else {
+          chartRef.current!.data.datasets.push(dataset)
+        }
+      })
+      chartRef.current.update()
+    } else {
+      // Otherwise, create a new chart
+      chartRef.current = new Chart(ctx, {
         type: 'bar',
         data: {
           labels: labels,
@@ -110,6 +114,7 @@ const SalesChart = ({ salesSummary, startDate, endDate }: SalesChartProps) => {
           animation: false, // Disable the opening animation
           plugins: {
             legend: {
+              display: false,
               position: 'top',
             },
             title: {
@@ -147,13 +152,32 @@ const SalesChart = ({ salesSummary, startDate, endDate }: SalesChartProps) => {
 
     // Cleanup on component unmount
     return () => {
-      if (ctx) {
-        Chart.getChart(ctx)?.destroy()
-      }
+      chartRef.current?.destroy()
+      chartRef.current = null
     }
-  }, [filteredSummary, startDate, endDate]) // Add filteredSummary, startDate, and endDate as dependencies
+  }, [filteredSummary, startDate, endDate, activeFormats, sortedFormats])
 
-  return <canvas ref={chartRef} />
+  return (
+    <div>
+      <div className="flex flex-wrap gap-2 mb-4">
+        {sortedFormats.map((format, index) => (
+          <button
+            key={format}
+            className={`px-3 py-1 rounded-full font-bold text-xs hover:opacity-80 hover:shadow-md`}
+            onClick={() => toggleFormat(format)}
+            style={{
+              backgroundColor: activeFormats.includes(format)
+                ? coloursQual[index % coloursQual.length]
+                : '#c0c0c0',
+            }}
+          >
+            {format}
+          </button>
+        ))}
+      </div>
+      <canvas ref={canvasRef} />
+    </div>
+  )
 }
 
 export default SalesChart
