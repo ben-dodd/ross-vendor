@@ -50,11 +50,11 @@ export const filterPayments = (
     .sort((a, b) => {
       switch (sortOption) {
         case 'dateRev':
-          return dayjs(a.date).diff(dayjs(b.date)) // Oldest to Newest
+          return dayjs(a.date)?.diff(dayjs(b.date)) // Oldest to Newest
         case 'type':
-          return a.type.localeCompare(b.type) // Sort by Type
+          return a.type?.localeCompare(b.type) // Sort by Type
         case 'reference':
-          return a.reference.localeCompare(b.reference) // Sort by reference
+          return a.reference?.localeCompare(b.reference) // Sort by reference
         case 'amount':
           return a.amount - b.amount // Sort by Price (assuming amount is the price)
         case 'amountRev':

@@ -9,12 +9,12 @@ export const sortOptions = [
   { value: 'vendorCutRev', label: 'Vendor Cut (High to Low)' },
   { value: 'price', label: 'Total Sell (Low to High)' },
   { value: 'priceRev', label: 'Total Sell (High to Low)' },
-  { value: 'storeCut', label: 'Store Cut (Low to High)' },
-  { value: 'storeCutRev', label: 'Store Cut (High to Low)' },
+  // { value: 'storeCut', label: 'Store Cut (Low to High)' },
+  // { value: 'storeCutRev', label: 'Store Cut (High to Low)' },
   { value: 'margin', label: 'Margin (Low to High)' },
   { value: 'marginRev', label: 'Margin (High to Low)' },
-  { value: 'quantity', label: 'Quantity (Low to High)' },
-  { value: 'quantityRev', label: 'Quantity (High to Low)' },
+  { value: 'quantity', label: 'Quantity In Stock (Low to High)' },
+  { value: 'quantityRev', label: 'Quantity In Stock (High to Low)' },
   { value: 'quantitySold', label: 'Quantity Sold (Low to High)' },
   { value: 'quantitySoldRev', label: 'Quantity Sold (High to Low)' },
 ]
@@ -81,13 +81,13 @@ export const filterStock = (stock, search, sortOption) =>
     ?.sort((a, b) => {
       switch (sortOption) {
         case 'sku':
-          return a.sku.localeCompare(b.sku) // Sort by SKU
+          return a.sku?.localeCompare(b.sku) // Sort by SKU
         case 'artist':
-          return a.artist.localeCompare(b.artist) // Sort by Artist
+          return a.artist?.localeCompare(b.artist) // Sort by Artist
         case 'title':
-          return a.title.localeCompare(b.title) // Sort by Title
+          return a.title?.localeCompare(b.title) // Sort by Title
         case 'format':
-          return a.format.localeCompare(b.format) // Sort by Format
+          return a.format?.localeCompare(b.format) // Sort by Format
         case 'vendorCut':
           return a.vendor_cut - b.vendor_cut // Sort by Vendor Cut
         case 'vendorCutRev':

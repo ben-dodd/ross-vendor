@@ -70,7 +70,11 @@ export default function Stock({ stock }) {
     <div className="w-full">
       <Title title={'RIDE ON SUPER SOUND STOCK'} downloadData={downloadData} />
       <div className="flex justify-between items-start space-x-8 py-2">
-        <Search value={search} setValue={setSearch} label="SEARCH STOCK" />
+        <Search
+          value={search}
+          setValue={handleSetSearch}
+          label="SEARCH STOCK"
+        />
         <DatePicker
           startDate={startDate}
           endDate={endDate}
