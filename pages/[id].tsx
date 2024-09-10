@@ -86,25 +86,25 @@ export default function VendorScreen() {
             </div>
             <div className="w-full">
               <Tabs
-                tabs={['Dashboard', 'Sales', 'Payments', 'Stock']}
+                tabs={['Stock', 'Sales', 'Payments']}
                 value={tab}
                 onChange={setTab}
               />
             </div>
-            <div hidden={tab !== 0}>
+            {/* <div hidden={tab !== 0}>
               <Dashboard
                 sales={vendorSales}
                 stock={vendorStock}
                 payments={vendorPayments}
               />
-            </div>
+            </div> */}
             <div hidden={tab !== 1}>
               <Sales sales={vendorSales} />
             </div>
             <div hidden={tab !== 2}>
               <Payments payments={vendorPayments} />
             </div>
-            <div hidden={tab !== 3}>
+            <div hidden={tab !== 0}>
               <Stock stock={vendorStock} />
             </div>
           </div>
