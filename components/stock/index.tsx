@@ -23,7 +23,7 @@ export default function Stock({ stock }) {
   const [sortOption, setSortOption] = useState('sku')
   const [pagination, setPagination] = useState<PaginationState>({
     currentPage: 1,
-    rowsPerPage: 10,
+    rowsPerPage: 50,
     totalRows: null,
     totalPages: null,
   })

@@ -23,7 +23,7 @@ export default function Payments({ payments }) {
   const [sortOption, setSortOption] = useState('date')
   const [pagination, setPagination] = useState<PaginationState>({
     currentPage: 1,
-    rowsPerPage: 10,
+    rowsPerPage: 50,
     totalRows: null,
     totalPages: null,
   })
