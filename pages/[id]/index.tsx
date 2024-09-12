@@ -16,6 +16,7 @@ import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import Dashboard from '@/components/dashboard'
+import SaleSummary from '@/components/saleSummary'
 
 export default function VendorScreen() {
   const router = useRouter()
@@ -86,7 +87,7 @@ export default function VendorScreen() {
             </div>
             <div className="w-full">
               <Tabs
-                tabs={['Sales', 'Stock', 'Payments']}
+                tabs={['Sales', 'Stock', 'Payments', 'Summary']}
                 value={tab}
                 onChange={setTab}
               />
@@ -106,6 +107,11 @@ export default function VendorScreen() {
             </div>
             <div hidden={tab !== 1}>
               <Stock stock={vendorStock} />
+            </div>
+            <div hidden={tab !== 3}>
+              <div className="w-full flex justify-start">
+                <SaleSummary totalTake={totalTake} totalPaid={totalPaid} />
+              </div>
             </div>
           </div>
         </div>

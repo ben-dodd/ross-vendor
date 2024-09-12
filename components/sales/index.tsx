@@ -14,6 +14,7 @@ import {
   tableSchema,
 } from './schema'
 import { PaginationState } from '../table/types'
+import SalesGrid from './grid'
 
 export default function Sales({ sales }) {
   const [search, setSearch] = useState('')
@@ -69,7 +70,7 @@ export default function Sales({ sales }) {
   return (
     <div className="w-full">
       <Title title={'RIDE ON SUPER SOUND SALES'} downloadData={downloadData} />
-      <div className="flex justify-between items-start space-x-8 py-2">
+      <div className="flex flex-col items-center py-2 md:flex-row md:justify-between md:items-start">
         <Search
           value={search}
           setValue={handleSetSearch}
@@ -91,12 +92,21 @@ export default function Sales({ sales }) {
           }}
         />
       </div>
-      <Table
-        data={tableData}
-        schema={tableSchema}
-        pagination={pagination}
-        setPagination={setPagination}
-      />
+      <div className="hidden md:block">
+        <Table
+          data={tableData}
+          schema={tableSchema}
+          pagination={pagination}
+          setPagination={setPagination}
+        />
+      </div>
+      <div className="block md:hidden">
+        <SalesGrid
+          data={tableData}
+          pagination={pagination}
+          setPagination={setPagination}
+        />
+      </div>
     </div>
   )
 }

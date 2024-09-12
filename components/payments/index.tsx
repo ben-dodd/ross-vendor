@@ -14,6 +14,8 @@ import {
 } from './schema'
 import Table from '../table'
 import { PaginationState } from '../table/types'
+import PaymentsGrid from './grid'
+import SaleSummary from '../saleSummary'
 
 export default function Payments({ payments }) {
   const [search, setSearch] = useState('')
@@ -74,7 +76,7 @@ export default function Payments({ payments }) {
         title={'RIDE ON SUPER SOUND PAYMENTS'}
         downloadData={downloadData}
       />
-      <div className="flex justify-between items-end space-x-8 py-2">
+      <div className="flex flex-col items-center py-2 md:flex-row md:justify-between md:items-start">
         <Search
           value={search}
           setValue={handleSetSearch}
@@ -93,12 +95,21 @@ export default function Payments({ payments }) {
           onChange={(val) => setSortOption(val)}
         />
       </div>
-      <Table
-        data={tableData}
-        schema={tableSchema}
-        pagination={pagination}
-        setPagination={setPagination}
-      />
+      <div className="hidden md:block">
+        <Table
+          data={tableData}
+          schema={tableSchema}
+          pagination={pagination}
+          setPagination={setPagination}
+        />
+      </div>
+      <div className="block md:hidden">
+        <PaymentsGrid
+          data={tableData}
+          pagination={pagination}
+          setPagination={setPagination}
+        />
+      </div>
     </div>
   )
 }

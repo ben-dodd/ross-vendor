@@ -1,5 +1,5 @@
 import Pagination from '@/components/table/pagination'
-import StockItem from '../item'
+import StockItem from './item'
 
 const StockGrid = ({ data, pagination, setPagination }) => {
   return (

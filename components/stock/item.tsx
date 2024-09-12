@@ -16,7 +16,6 @@ const StockItem = ({ item }) => {
     // For Grid only
     image_url: item?.image_url?.value,
     section: item?.section?.value,
-    // isBestSeller: item?.isBestSeller?.value,
   }
   return (
     <div
@@ -24,16 +23,6 @@ const StockItem = ({ item }) => {
         'relative flex w-full p-2 shadow-sm hover:shadow-md items-center justify-between border border-gray-300 rounded-md'
       }
     >
-      {/* {stockItem?.qtySold > 5 && (
-        <div className="absolute top-0 right-0 w-20 h-20 flex items-center justify-center text-xs font-bold text-white transform translate-x-1/2 -translate-y-1/2">
-          <div className="relative w-full h-full">
-            <div className="absolute inset-0 bg-yellow-500 clip-star"></div>
-            <span className="absolute inset-0 flex items-center justify-center z-10">
-              TOP SELLER
-            </span>
-          </div>
-        </div>
-      )} */}
       <div className={`w-[120px] h-full flex flex-col justify-start`}>
         <img
           className="object-cover w-full aspect-ratio-square"
