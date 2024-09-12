@@ -14,8 +14,10 @@ import {
 } from './schema'
 import Table from '../table'
 import { PaginationState } from '../table/types'
+import Grid from './grid'
 
 export default function Stock({ stock }) {
+  const [view, setView] = useState('table')
   const [search, setSearch] = useState('')
   const [startDate, setStartDate] = useState('2018-11-03')
   const [endDate, setEndDate] = useState(dayjs().format('YYYY-MM-DD'))
@@ -27,6 +29,9 @@ export default function Stock({ stock }) {
     totalRows: null,
     totalPages: null,
   })
+
+  const toggleView = () =>
+    setView((view) => (view === 'table' ? 'grid' : 'table'))
 
   useEffect(
     () =>
@@ -68,8 +73,26 @@ export default function Stock({ stock }) {
 
   return (
     <div className="w-full">
-      <Title title={'RIDE ON SUPER SOUND STOCK'} downloadData={downloadData} />
-      <div className="flex justify-between items-start space-x-8 py-2">
+      {/* <Title title={'RIDE ON SUPER SOUND STOCK'} downloadData={downloadData} /> */}
+      <div className="flex justify-between items-center bg-orange-800 text-white font-bold italic px-2 py-1 mb-2">
+        <div className="md:hidden" />
+        <div className="hidden md:block">RIDE ON SUPER SOUND STOCK</div>
+        <div className="flex">
+          <div
+            onClick={toggleView}
+            className={`hidden md:block uppercase px-4 py-1 mr-2 cursor-pointer italic text-orange-600 hover:text-orange-300 bg-white font-black text-sm`}
+          >
+            {`SWITCH TO ${view === 'table' ? 'GRID' : 'TABLE'} VIEW`}
+          </div>
+          <div
+            onClick={downloadData}
+            className={`uppercase px-4 py-1 cursor-pointer italic text-orange-600 hover:text-orange-300 bg-white font-black text-sm`}
+          >
+            DOWNLOAD DATA
+          </div>
+        </div>
+      </div>
+      <div className="flex flex-col items-center py-2 md:flex-row md:justify-between md:items-start">
         <Search
           value={search}
           setValue={handleSetSearch}
@@ -88,12 +111,29 @@ export default function Stock({ stock }) {
           onChange={(val) => setSortOption(val)}
         />
       </div>
-      <Table
-        data={tableData}
-        schema={tableSchema}
-        pagination={pagination}
-        setPagination={setPagination}
-      />
+      <div className="hidden md:block">
+        {view === 'table' ? (
+          <Table
+            data={tableData}
+            schema={tableSchema}
+            pagination={pagination}
+            setPagination={setPagination}
+          />
+        ) : (
+          <Grid
+            data={tableData}
+            pagination={pagination}
+            setPagination={setPagination}
+          />
+        )}
+      </div>
+      <div className="block md:hidden">
+        <Grid
+          data={tableData}
+          pagination={pagination}
+          setPagination={setPagination}
+        />
+      </div>
     </div>
   )
 }

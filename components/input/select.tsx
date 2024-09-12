@@ -6,15 +6,15 @@ const Select = ({
   placeholder = null,
 }) => {
   return (
-    <div>
-      {label && <div className={'text-sm font-bold'}>{label}</div>}
+    <div className="w-full">
+      {label && <div className={'text-xs md:text-sm font-bold'}>{label}</div>}
       <div
         className={`flex flex-1 my-1 p-1 rounded-lg justify-between items-center ring-1 ring-gray-400 w-auto bg-gray-100 hover:bg-gray-200 ${
           value && 'bg-blue-100 hover:bg-blue-200'
         }`}
       >
         <select
-          className="w-full px-2 py-1 outline-none bg-transparent cursor-pointer"
+          className="w-full px-2 py-1 outline-none bg-transparent cursor-pointer text-sm md:text-md"
           value={value}
           onChange={(e) => onChange(e.target.value)}
         >

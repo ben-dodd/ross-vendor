@@ -5,18 +5,18 @@ export const sortOptions = [
   { value: 'artist', label: 'Artist' },
   { value: 'title', label: 'Title' },
   { value: 'format', label: 'Format' },
-  { value: 'vendorCut', label: 'Vendor Cut (Low to High)' },
-  { value: 'vendorCutRev', label: 'Vendor Cut (High to Low)' },
-  { value: 'price', label: 'Total Sell (Low to High)' },
-  { value: 'priceRev', label: 'Total Sell (High to Low)' },
+  // { value: 'vendorCut', label: 'Vendor Cut (Low to High)' },
+  // { value: 'vendorCutRev', label: 'Vendor Cut (High to Low)' },
+  { value: 'price', label: 'Cheapest Items' },
+  { value: 'priceRev', label: 'Most Expensive Items' },
   // { value: 'storeCut', label: 'Store Cut (Low to High)' },
   // { value: 'storeCutRev', label: 'Store Cut (High to Low)' },
-  { value: 'margin', label: 'Margin (Low to High)' },
-  { value: 'marginRev', label: 'Margin (High to Low)' },
-  { value: 'quantity', label: 'Quantity In Stock (Low to High)' },
-  { value: 'quantityRev', label: 'Quantity In Stock (High to Low)' },
-  { value: 'quantitySold', label: 'Quantity Sold (Low to High)' },
-  { value: 'quantitySoldRev', label: 'Quantity Sold (High to Low)' },
+  { value: 'margin', label: 'Lowest Margin' },
+  { value: 'marginRev', label: 'Highest Margin' },
+  { value: 'quantity', label: 'Quantity In Store (Low to High)' },
+  { value: 'quantityRev', label: 'Quantity In Store (High to Low)' },
+  { value: 'quantitySold', label: 'Best Sellers' },
+  { value: 'quantitySoldRev', label: 'Worst Sellers' },
 ]
 
 export const csvSchema = [
@@ -43,7 +43,7 @@ export const tableSchema = [
   { width: 64, label: 'VENDOR CUT', field: 'vendorCut', align: 'right' },
   { width: 64, label: 'TOTAL SELL', field: 'totalSell', align: 'right' },
   { width: 64, label: 'MARGIN', field: 'margin', align: 'right' },
-  { width: 64, label: 'QTY IN STOCK', field: 'qtyInStock', align: 'right' },
+  { width: 64, label: 'QTY IN STORE', field: 'qtyInStock', align: 'right' },
   { width: 64, label: 'QTY SOLD', field: 'qtySold', align: 'right' },
 ]
 
@@ -67,6 +67,9 @@ export const tableStock = (stock) =>
       red: item?.quantity < 1,
     },
     qtySold: { value: item?.quantity_sold < 0 ? 0 : item?.quantity_sold },
+    // For Grid only
+    image_url: { value: item?.image_url },
+    section: { value: item?.section },
   }))
 
 export const filterStock = (stock, search, sortOption) =>

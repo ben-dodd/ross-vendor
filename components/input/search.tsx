@@ -4,8 +4,8 @@ const Search = ({ value, setValue, label = null, placeholder = null }) => {
   const handleSearch = (e) => setValue(e.target.value)
   const clearInput = () => setValue('')
   return (
-    <div>
-      {label && <div className={'text-sm font-bold'}>{label}</div>}
+    <div className="w-full">
+      {label && <div className={'text-xs md:text-sm font-bold'}>{label}</div>}
       <div
         className={`flex flex-1 my-1 p-1 rounded-lg justify-between items-center ring-1 ring-gray-400 w-auto bg-gray-100 hover:bg-gray-200 ${
           value && 'bg-blue-100 hover:bg-blue-200'

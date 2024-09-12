@@ -18,6 +18,23 @@ export function getItemSku(item: StockObject) {
   ).slice(-5)}`
 }
 
+export function getItemDisplayName(item: StockObject) {
+  if (item?.display_as) return item?.display_as
+  if (!item || !(item?.artist || item?.title)) return 'Untitled'
+  if (item?.media === 'Clothing/Accessories')
+    return getClothingDisplayName(item)
+  return `${item?.title || ''}${item?.title && item?.artist ? ' - ' : ''}${
+    item?.artist || ''
+  }`
+}
+
+export function getClothingDisplayName(item: StockObject) {
+  // M - Reaper Crew Sweatshirt (Petrol Blue)
+  return `${item?.size ? `${item?.size} - ` : ''}${
+    item?.title ? `${item?.title}` : ''
+  }${item?.colour ? ` (${item?.colour})` : ''}`
+}
+
 export function getImageSrc(item: StockObject) {
   let src = 'default'
   if (item?.image_url) return item.image_url
