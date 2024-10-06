@@ -1,6 +1,8 @@
 import { writePrice } from '@/lib/data-functions'
 
 export const sortOptions = [
+  { value: 'quantity', label: 'Quantity In Store (Low to High)' },
+  { value: 'quantityRev', label: 'Quantity In Store (High to Low)' },
   { value: 'sku', label: 'SKU' },
   { value: 'artist', label: 'Artist' },
   { value: 'title', label: 'Title' },
@@ -13,8 +15,6 @@ export const sortOptions = [
   // { value: 'storeCutRev', label: 'Store Cut (High to Low)' },
   { value: 'margin', label: 'Lowest Margin' },
   { value: 'marginRev', label: 'Highest Margin' },
-  { value: 'quantity', label: 'Quantity In Store (Low to High)' },
-  { value: 'quantityRev', label: 'Quantity In Store (High to Low)' },
   { value: 'quantitySold', label: 'Best Sellers' },
   { value: 'quantitySoldRev', label: 'Worst Sellers' },
 ]

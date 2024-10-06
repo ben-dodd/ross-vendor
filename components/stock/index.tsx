@@ -22,7 +22,7 @@ export default function Stock({ stock }) {
   const [startDate, setStartDate] = useState('2018-11-03')
   const [endDate, setEndDate] = useState(dayjs().format('YYYY-MM-DD'))
   const [filteredStock, setFilteredStock] = useState(stock)
-  const [sortOption, setSortOption] = useState('sku')
+  const [sortOption, setSortOption] = useState('quantity')
   const [pagination, setPagination] = useState<PaginationState>({
     currentPage: 1,
     rowsPerPage: 50,
