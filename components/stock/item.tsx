@@ -17,6 +17,7 @@ const StockItem = ({ item }) => {
     image_url: item?.image_url?.value,
     section: item?.section?.value,
   }
+
   return (
     <div
       className={
@@ -48,7 +49,7 @@ const StockItem = ({ item }) => {
             </>
           </div>
           <div className="">{`${
-            stockItem?.qtySold === 0
+            !stockItem?.qtySold
               ? 'NO COPIES SOLD'
               : stockItem?.qtySold > 1
               ? `${stockItem?.qtySold} COPIES SOLD`

@@ -111,9 +111,9 @@ export const filterStock = (stock, search, sortOption) =>
           return a.quantity - b.quantity // Sort by Quantity
         case 'quantityRev':
           return b.quantity - a.quantity // Sort by Quantity (Descending)
-        case 'quantitySold':
-          return a.quantity_sold - b.quantity_sold // Sort by Quantity Sold
         case 'quantitySoldRev':
+          return a.quantity_sold - b.quantity_sold // Sort by Quantity Sold
+        case 'quantitySold':
           return b.quantity_sold - a.quantity_sold // Sort by Quantity Sold (Descending)
         default:
           return 0 // No sorting if the key doesn't match any case
