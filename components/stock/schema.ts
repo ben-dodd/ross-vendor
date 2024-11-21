@@ -63,10 +63,15 @@ export const tableStock = (stock) =>
     totalSell: { value: writePrice(item?.total_sell) },
     margin: { value: item?.margin && `${item?.margin?.toFixed?.(1)}%` },
     qtyInStock: {
-      value: item?.quantity < 0 ? 0 : item?.quantity,
-      red: item?.quantity < 1,
+      value: !item?.quantity || item?.quantity < 0 ? 0 : item?.quantity,
+      red: !item?.quantity || item?.quantity < 1,
     },
-    qtySold: { value: item?.quantity_sold < 0 ? 0 : item?.quantity_sold },
+    qtySold: {
+      value:
+        !item?.quantity_sold || item?.quantity_sold < 0
+          ? 0
+          : item?.quantity_sold,
+    },
     // For Grid only
     image_url: { value: item?.image_url },
     section: { value: item?.section },

@@ -1,7 +1,4 @@
-import { getItemDisplayName } from '@/lib/data-functions'
-
 const PaymentItem = ({ payment }) => {
-  console.log(payment)
   return (
     <div className={'w-full p-2 border-b border-gray-300'}>
       <div className="w-full h-full flex justify-between px-2 items-start">

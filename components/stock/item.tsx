@@ -18,6 +18,8 @@ const StockItem = ({ item }) => {
     section: item?.section?.value,
   }
 
+  console.log(stockItem)
+
   return (
     <div
       className={
